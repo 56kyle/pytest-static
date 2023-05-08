@@ -10,6 +10,16 @@ repository = "https://github.com/56kyle/pytest-static"
 documentation = "https://pytest-static.readthedocs.io"
 classifiers = [
     "Development Status :: 1 - Planning",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Testing",
+    "Framework :: Pytest",
+    "Framework :: Pytest :: Plugin",
 ]
 
 [tool.poetry.urls]
@@ -18,6 +28,7 @@ Changelog = "https://github.com/56kyle/pytest-static/releases"
 [tool.poetry.dependencies]
 python = "^3.7"
 click = ">=8.0.1"
+loguru = "^0.7.0"
 
 [tool.poetry.dev-dependencies]
 Pygments = ">=2.10.0"
@@ -47,6 +58,9 @@ myst-parser = {version = ">=0.16.1"}
 
 [tool.poetry.scripts]
 pytest-static = "pytest_static.__main__:main"
+
+[tool.poetry.plugins."pytest"]
+pytest-static= "pytest_static.plugin"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
