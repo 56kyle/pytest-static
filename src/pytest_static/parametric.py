@@ -1,4 +1,5 @@
 """A Python module used for parameterizing Literal's and common types."""
+import inspect
 import itertools
 from dataclasses import dataclass
 from dataclasses import field
@@ -53,16 +54,80 @@ class ExpandedType(Generic[T]):
 
     def get_instances(self) -> Tuple[T, ...]:
         """Returns a tuple of all possible instances of the primary_type."""
-        type_sets: List[Tuple[T, ...]] = []
+        parameter_instance_sets: List[
+            Tuple[T, ...]
+        ] = self._get_parameter_instance_sets()
+        parameter_combinations: List[
+            Tuple[Any, ...]
+        ] = self._get_parameter_combinations(parameter_instance_sets)
+        instances = self._instantiate_each_parameter_combination(parameter_combinations)
+        return instances
+
+    def _get_parameter_instance_sets(self) -> List[Tuple[T, ...]]:
+        parameter_instances: List[Tuple[T, ...]] = []
         for arg in self.type_args:
             if isinstance(arg, ExpandedType):
-                type_sets.append(arg.get_instances())
+                parameter_instances.append(arg.get_instances())
             else:
-                type_sets.append(PREDEFINED_TYPE_SETS.get(arg, arg))
-        instances: List[T] = list(
-            self.primary_type(*args) for args in itertools.product(*type_sets)
-        )
-        return tuple(instances)
+                parameter_instances.append(tuple(PREDEFINED_TYPE_SETS.get(arg, arg)))
+        return parameter_instances
+
+    def _get_parameter_combinations(
+        self, parameter_instance_sets: List[Tuple[T, ...]]
+    ) -> List[Tuple[Any, ...]]:
+        """Returns a list of parameter combinations."""
+        if len(parameter_instance_sets) >= 2:
+            return list(itertools.product(*parameter_instance_sets))
+        return list(zip(*parameter_instance_sets, strict=True))
+
+    def _instantiate_each_parameter_combination(
+        self, parameter_combinations: List[Tuple[Any, ...]]
+    ) -> Tuple[T, ...]:
+        """Returns a tuple of all possible instances of the primary_type."""
+        try:
+            return self._instantiate_from_signature(parameter_combinations)
+        except ValueError as e:
+            if "no signature found for builtin type" not in str(e):
+                raise e
+            return self._instantiate_from_trial_and_error(parameter_combinations)
+
+    def _instantiate_from_signature(
+        self, parameter_combinations: List[Tuple[Any, ...]]
+    ) -> Tuple[T, ...]:
+        """Returns a tuple of all possible instances of the primary_type."""
+        signature: inspect.Signature = inspect.signature(self.primary_type)
+        if len(signature.parameters) > 1:
+            return tuple(
+                self._instantiate_expanded(pc) for pc in parameter_combinations
+            )
+        else:
+            return tuple(
+                self._instantiate_not_expanded(pc) for pc in parameter_combinations
+            )
+
+    def _instantiate_from_trial_and_error(
+        self, parameter_combinations: List[Tuple[Any, ...]]
+    ) -> Tuple[T, ...]:
+        """Returns a tuple of all possible instances of the primary_type."""
+        try:
+            return tuple(
+                self._instantiate_expanded(pc) for pc in parameter_combinations
+            )
+        except TypeError:
+            return tuple(
+                self._instantiate_not_expanded(pc) for pc in parameter_combinations
+            )
+
+    def _instantiate_expanded(self, combination: Tuple[Any, ...]) -> T:
+        """Returns an instance of the primary_type using the combination provided."""
+        if self.primary_type is dict:
+            return {combination[0]: combination[1]}
+        else:
+            return self.primary_type(*combination)
+
+    def _instantiate_not_expanded(self, combination: Tuple[Any, ...]) -> T:
+        """Returns an instance of the primary_type using the combination provided."""
+        return self.primary_type(combination)
 
 
 @dataclass(frozen=True)
@@ -92,26 +157,29 @@ def parametrize_types(
     if len(argnames) != len(argtypes):
         raise ValueError("The number of argnames and argtypes must be the same.")
 
-    expanded_types = [expand_type(t) for t in argtypes]
-    type_sets = [list(et) for et in expanded_types]
-
-    # Get instances for each type set
-    instance_sets = []
-    for ts in type_sets:
-        instances = []
-        for t in ts:
-            if isinstance(t, ExpandedType):
-                instances.extend(t.get_instances())
-            else:
-                instances.extend(PREDEFINED_TYPE_SETS.get(t, []))
-        instance_sets.append(instances)
-
-    instance_combinations = list(itertools.product(*instance_sets))
+    instance_sets: List[List[T]] = [
+        list(get_all_possible_type_instances(t)) for t in argtypes
+    ]
+    instance_combinations: List[List[T]] = list(itertools.product(*instance_sets))
 
     if ids is None:
         ids = [", ".join(map(repr, ic)) for ic in instance_combinations]
 
     metafunc.parametrize(argnames, instance_combinations, ids=ids, *args, **kwargs)
+
+
+def get_all_possible_type_instances(
+    type_arg: Type[T], config: Config = DEFAULT_CONFIG
+) -> Tuple[T, ...]:
+    """Returns a tuple of all possible instances of the provided type."""
+    expanded_types: Set[Union[Any, ExpandedType[T]]] = expand_type(type_arg, config)
+    instances: List[T] = []
+    for expanded_type in expanded_types:
+        if isinstance(expanded_type, ExpandedType):
+            instances.extend(expanded_type.get_instances())
+        else:
+            instances.extend(PREDEFINED_TYPE_SETS.get(expanded_type, []))
+    return tuple(instances)
 
 
 def _ensure_sequence(value: Union[str, Sequence[str]]) -> Sequence[str]:

@@ -104,8 +104,8 @@ def test_parametrize_types_with_multiple_basic(
     argvalues=[
         (("List[int]",), len(IntParams)),
         (("List[str]",), len(StrParams)),
-        (("Dict[str, int]",), len(StrParams) * len(IntParams)),
-        (("Dict[str, str]",), len(StrParams) * len(StrParams)),
+        (("Dict[bool, int]",), len(BoolParams) * len(IntParams)),
+        (("Dict[str, bool]",), len(StrParams) * len(BoolParams)),
         (("Tuple[int, str]",), len(IntParams) * len(StrParams)),
     ],
     ids=lambda x: str(x) if isinstance(x, Iterable) else "",
@@ -123,12 +123,12 @@ def test_parametrize_types_with_single_expanded(
     argvalues=[
         (("List[int]", "List[str]"), len(IntParams) * len(StrParams)),
         (
-            ("List[int]", "Dict[str, int]"),
-            len(IntParams) * len(StrParams) * len(IntParams),
+            ("List[int]", "Dict[bool, int]"),
+            len(IntParams) * len(BoolParams) * len(IntParams),
         ),
         (
-            ("List[int]", "Dict[str, str]"),
-            len(IntParams) * len(StrParams) * len(StrParams),
+            ("List[int]", "Dict[str, bool]"),
+            len(IntParams) * len(StrParams) * len(BoolParams),
         ),
     ],
     ids=lambda x: str(x) if isinstance(x, Iterable) else "",
