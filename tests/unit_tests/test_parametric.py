@@ -15,10 +15,10 @@ from typing import Union
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
 
-from pytest_static.parametric import Config
-from pytest_static.parametric import ExpandedType
-from pytest_static.parametric import expand_type
-from pytest_static.type_sets import PREDEFINED_TYPE_SETS
+from src.pytest_static.parametric import Config
+from src.pytest_static.parametric import ExpandedType
+from src.pytest_static.parametric import expand_type
+from src.pytest_static.type_sets import PREDEFINED_TYPE_SETS
 
 
 T = TypeVar("T")
@@ -167,7 +167,6 @@ def test_expand_type_with_sum_types(type_arg: Type[T], expected: Sequence[Any]) 
 def test_expand_type_with_recursive_types(
     type_arg: Type[T], expected: Sequence[Any]
 ) -> None:
-
     assert expand_type(type_arg) == {*expected}
 
 

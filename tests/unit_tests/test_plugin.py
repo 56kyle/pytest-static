@@ -7,14 +7,14 @@ from typing import Union
 
 import pytest
 
-from pytest_static.plugin import pytest_configure
-from pytest_static.type_sets import PREDEFINED_TYPE_SETS
-from pytest_static.type_sets import BoolParams
-from pytest_static.type_sets import BytesParams
-from pytest_static.type_sets import ComplexParams
-from pytest_static.type_sets import FloatParams
-from pytest_static.type_sets import IntParams
-from pytest_static.type_sets import StrParams
+from src.pytest_static.plugin import pytest_configure
+from src.pytest_static.type_sets import PREDEFINED_TYPE_SETS
+from src.pytest_static.type_sets import BoolParams
+from src.pytest_static.type_sets import BytesParams
+from src.pytest_static.type_sets import ComplexParams
+from src.pytest_static.type_sets import FloatParams
+from src.pytest_static.type_sets import IntParams
+from src.pytest_static.type_sets import StrParams
 
 
 @pytest.mark.parametrize_types("foo", [Union[int, str]])

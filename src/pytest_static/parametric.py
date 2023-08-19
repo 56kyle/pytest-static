@@ -60,10 +60,13 @@ class ExpandedType(Generic[T]):
         parameter_combinations: List[
             Tuple[Any, ...]
         ] = self._get_parameter_combinations(parameter_instance_sets)
-        instances = self._instantiate_each_parameter_combination(parameter_combinations)
+        instances: Tuple[T, ...] = self._instantiate_each_parameter_combination(
+            parameter_combinations
+        )
         return instances
 
     def _get_parameter_instance_sets(self) -> List[Tuple[T, ...]]:
+        """Returns a list of parameter instance sets."""
         parameter_instances: List[Tuple[T, ...]] = []
         for arg in self.type_args:
             if isinstance(arg, ExpandedType):
@@ -76,7 +79,7 @@ class ExpandedType(Generic[T]):
         self, parameter_instance_sets: List[Tuple[T, ...]]
     ) -> List[Tuple[Any, ...]]:
         """Returns a list of parameter combinations."""
-        if len(parameter_instance_sets) >= 2:
+        if len(parameter_instance_sets) > 1:
             return list(itertools.product(*parameter_instance_sets))
         return list(zip(*parameter_instance_sets, strict=True))
 
@@ -100,10 +103,9 @@ class ExpandedType(Generic[T]):
             return tuple(
                 self._instantiate_expanded(pc) for pc in parameter_combinations
             )
-        else:
-            return tuple(
-                self._instantiate_not_expanded(pc) for pc in parameter_combinations
-            )
+        return tuple(
+            self._instantiate_not_expanded(pc) for pc in parameter_combinations
+        )
 
     def _instantiate_from_trial_and_error(
         self, parameter_combinations: List[Tuple[Any, ...]]
@@ -183,6 +185,7 @@ def get_all_possible_type_instances(
 
 
 def _ensure_sequence(value: Union[str, Sequence[str]]) -> Sequence[str]:
+    """Returns the provided value as a sequence."""
     if isinstance(value, str):
         return value.split(", ")
     return value

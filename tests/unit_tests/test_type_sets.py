@@ -1,4 +1,4 @@
-from pytest_static.type_sets import PREDEFINED_TYPE_SETS
+from src.pytest_static.type_sets import PREDEFINED_TYPE_SETS
 
 
 def test_type_sets() -> None:
