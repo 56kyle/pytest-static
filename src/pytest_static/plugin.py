@@ -3,7 +3,7 @@
 import pytest
 from _pytest.python import Metafunc
 
-from src.pytest_static.parametric import parametrize_types
+from pytest_static.parametric import parametrize_types
 
 
 def pytest_generate_tests(metafunc: Metafunc) -> None:

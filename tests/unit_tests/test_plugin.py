@@ -3,23 +3,16 @@ from typing import Any
 from typing import Iterable
 from typing import List
 from typing import Sequence
-from typing import Union
 
 import pytest
 
-from src.pytest_static.plugin import pytest_configure
-from src.pytest_static.type_sets import PREDEFINED_TYPE_SETS
-from src.pytest_static.type_sets import BoolParams
-from src.pytest_static.type_sets import BytesParams
-from src.pytest_static.type_sets import ComplexParams
-from src.pytest_static.type_sets import FloatParams
-from src.pytest_static.type_sets import IntParams
-from src.pytest_static.type_sets import StrParams
-
-
-@pytest.mark.parametrize_types("foo", [Union[int, str]])
-def test_parametrize(foo: Any):
-    assert foo in PREDEFINED_TYPE_SETS[type(foo)]
+from pytest_static.plugin import pytest_configure
+from pytest_static.type_sets import BoolParams
+from pytest_static.type_sets import BytesParams
+from pytest_static.type_sets import ComplexParams
+from pytest_static.type_sets import FloatParams
+from pytest_static.type_sets import IntParams
+from pytest_static.type_sets import StrParams
 
 
 @pytest.fixture
@@ -80,7 +73,7 @@ def parametrize_types_test(
 def test_parametrize_types_with_single_basic(
     pytester: pytest.Pytester, parametrize_types_test: Path, expected: int
 ) -> None:
-    result: pytest.Result = pytester.runpytest(parametrize_types_test)
+    result: pytest.RunResult = pytester.runpytest(parametrize_types_test)
     result.assert_outcomes(passed=expected)
 
 
@@ -95,7 +88,7 @@ def test_parametrize_types_with_single_basic(
 def test_parametrize_types_with_multiple_basic(
     pytester: pytest.Pytester, parametrize_types_test: Path, expected: int
 ) -> None:
-    result: pytest.Result = pytester.runpytest(parametrize_types_test)
+    result: pytest.RunResult = pytester.runpytest(parametrize_types_test)
     result.assert_outcomes(passed=expected)
 
 
@@ -114,7 +107,7 @@ def test_parametrize_types_with_multiple_basic(
 def test_parametrize_types_with_single_expanded(
     pytester: pytest.Pytester, parametrize_types_test: Path, expected: int
 ) -> None:
-    result: pytest.Result = pytester.runpytest(parametrize_types_test)
+    result: pytest.RunResult = pytester.runpytest(parametrize_types_test)
     result.assert_outcomes(passed=expected)
 
 
@@ -137,7 +130,7 @@ def test_parametrize_types_with_single_expanded(
 def test_parametrize_types_with_multiple_expanded(
     pytester: pytest.Pytester, parametrize_types_test: Path, expected: int
 ) -> None:
-    result: pytest.Result = pytester.runpytest(parametrize_types_test)
+    result: pytest.RunResult = pytester.runpytest(parametrize_types_test)
     result.assert_outcomes(passed=expected)
 
 

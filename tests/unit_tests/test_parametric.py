@@ -15,10 +15,10 @@ from typing import Union
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
 
-from src.pytest_static.parametric import Config
-from src.pytest_static.parametric import ExpandedType
-from src.pytest_static.parametric import expand_type
-from src.pytest_static.type_sets import PREDEFINED_TYPE_SETS
+from pytest_static.parametric import Config
+from pytest_static.parametric import ExpandedType
+from pytest_static.parametric import expand_type
+from pytest_static.type_sets import PREDEFINED_TYPE_SETS
 
 
 T = TypeVar("T")
