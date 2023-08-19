@@ -24,7 +24,7 @@ from typing import get_origin
 
 from _pytest.python import Metafunc
 
-from pytest_static.type_sets import PREDEFINED_TYPE_SETS
+from src.pytest_static.type_sets import PREDEFINED_TYPE_SETS
 
 
 T = TypeVar("T")

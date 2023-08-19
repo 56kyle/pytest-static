@@ -148,7 +148,6 @@ StrParams: Set[str] = {
     *TripleQuotes,
 }
 
-# Float
 FloatParams: Set[float] = {
     0.0,
     -0.0,
@@ -163,7 +162,6 @@ FloatParams: Set[float] = {
     float("nan"),
 }
 
-# Complex
 ComplexParams: Set[complex] = {
     0j,
     1j,
@@ -180,7 +178,6 @@ ComplexParams: Set[complex] = {
     (-1e10 - 1e10j),
 }
 
-# bytes
 BytesParams: Set[bytes] = {
     b"",
     b"\x00",
