@@ -69,6 +69,81 @@ class TestExpandedType:
         for instance in expected_instances:
             assert instance in expanded_instances
 
+    @pytest.mark.parametrize(
+        argnames=["primary_type", "type_args", "expected_sets"],
+        argvalues=[
+            (
+                List,
+                (int,),
+                [
+                    PREDEFINED_TYPE_SETS[int],
+                ],
+            ),
+            (Union, (int, str), [PREDEFINED_TYPE_SETS[int], PREDEFINED_TYPE_SETS[str]]),
+            (Tuple, (int, str), [PREDEFINED_TYPE_SETS[int], PREDEFINED_TYPE_SETS[str]]),
+        ],
+        ids=["nested_param", "sum_param", "product_param"],
+    )
+    def test__get_parameter_instance_sets(
+        self,
+        primary_type: Type[T],
+        type_args: Type[T],
+        expected_sets: Tuple[Set[Any], ...],
+    ) -> None:
+        expected_sets = [tuple(expected_set) for expected_set in expected_sets]
+        assert (
+            ExpandedType(
+                primary_type=primary_type,
+                type_args=type_args,
+            )._get_parameter_instance_sets()
+            == expected_sets
+        )
+
+    @pytest.mark.parametrize(
+        argnames=["instance_sets", "expected_combinations"],
+        argvalues=[
+            ([(1, 2)], [(1,), (2,)]),
+            ([(1, 2), (3, 4)], [(1, 3), (1, 4), (2, 3), (2, 4)]),
+        ],
+        ids=[
+            "single_set",
+            "multiple_sets",
+        ],
+    )
+    def test__get_parameter_combinations(
+        self,
+        instance_sets: List[Tuple[T, ...]],
+        expected_combinations: List[Tuple[Any, ...]],
+    ) -> None:
+        assert (
+            ExpandedType._get_parameter_combinations(instance_sets)
+            == expected_combinations
+        )
+
+    def test__instantiate_each_parameter_combination(self) -> None:
+        pass
+
+    def test__instantiate_from_signature(self) -> None:
+        pass
+
+    def test__instantiate_from_trial_and_error(self) -> None:
+        pass
+
+    def test__instantiate_combinations_using_expanded(self) -> None:
+        pass
+
+    def test__instantiate_combinations_using_not_expanded(self) -> None:
+        pass
+
+    def test__instantiate_expanded(self) -> None:
+        pass
+
+    def test__instantiate_not_expanded(
+        self,
+        expanded_type: ExpandedType,
+    ) -> None:
+        pass
+
 
 @pytest.mark.parametrize(
     argnames=["type_arg", "expected"],

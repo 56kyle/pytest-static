@@ -58,14 +58,25 @@ class ExpandedType(Generic[T]):
     primary_type: Type[T]
     type_args: Tuple[Union[Any, "ExpandedType[Any]"], ...]
 
+    @staticmethod
+    def _get_parameter_combinations(
+        parameter_instance_sets: List[Tuple[T, ...]]
+    ) -> List[Tuple[Any, ...]]:
+        """Returns a list of parameter combinations."""
+        if len(parameter_instance_sets) > 1:
+            return list(itertools.product(*parameter_instance_sets))
+        return list(zip(*parameter_instance_sets, strict=True))
+
     def get_instances(self) -> Tuple[T, ...]:
         """Returns a tuple of all possible instances of the primary_type."""
         parameter_instance_sets: List[
             Tuple[T, ...]
         ] = self._get_parameter_instance_sets()
+
         parameter_combinations: List[
             Tuple[Any, ...]
         ] = self._get_parameter_combinations(parameter_instance_sets)
+
         instances: Tuple[T, ...] = self._instantiate_each_parameter_combination(
             parameter_combinations
         )
@@ -80,14 +91,6 @@ class ExpandedType(Generic[T]):
             else:
                 parameter_instances.append(tuple(PREDEFINED_TYPE_SETS.get(arg, arg)))
         return parameter_instances
-
-    def _get_parameter_combinations(
-        self, parameter_instance_sets: List[Tuple[T, ...]]
-    ) -> List[Tuple[Any, ...]]:
-        """Returns a list of parameter combinations."""
-        if len(parameter_instance_sets) > 1:
-            return list(itertools.product(*parameter_instance_sets))
-        return list(zip(*parameter_instance_sets, strict=True))
 
     def _instantiate_each_parameter_combination(
         self, parameter_combinations: List[Tuple[Any, ...]]
