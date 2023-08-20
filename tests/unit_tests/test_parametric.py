@@ -44,28 +44,28 @@ class TestExpandedType:
     def test_get_instances_with_multiple(self, monkeypatch: MonkeyPatch) -> None:
         monkeypatch.setitem(PREDEFINED_TYPE_SETS, int, {1, 2})
         monkeypatch.setitem(PREDEFINED_TYPE_SETS, str, {"a", "b"})
-        expected_instances: Tuple[List[int, str], ...] = (
+        expected_instances: Tuple[List[Union[int, str]], ...] = (
             [1, "a"],
             [1, "b"],
             [2, "a"],
             [2, "b"],
         )
-        expanded_type = ExpandedType(list, (int, str))
-        expanded_instances: Tuple[Tuple[Any, ...], ...] = expanded_type.get_instances()
+        expanded_type: ExpandedType[List[Any]] = ExpandedType(list, (int, str))
+        expanded_instances: Tuple[List[Any], ...] = expanded_type.get_instances()
         for instance in expected_instances:
             assert instance in expanded_instances
 
     def test_get_instances_with_multiple_nested(self, monkeypatch: MonkeyPatch) -> None:
         monkeypatch.setitem(PREDEFINED_TYPE_SETS, int, {1, 2})
         monkeypatch.setitem(PREDEFINED_TYPE_SETS, str, {"a", "b"})
-        expected_instances: Tuple[List[List[int], str], ...] = (
+        expected_instances: Tuple[List[Union[List[int], str]], ...] = (
             [[1], "a"],
             [[1], "b"],
             [[2], "a"],
             [[2], "b"],
         )
         expanded_type = ExpandedType(list, (ExpandedType(list, (int,)), str))
-        expanded_instances: Tuple[Tuple[Any, ...], ...] = expanded_type.get_instances()
+        expanded_instances: Tuple[List[Any], ...] = expanded_type.get_instances()
         for instance in expected_instances:
             assert instance in expanded_instances
 

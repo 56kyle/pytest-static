@@ -4,6 +4,7 @@ import itertools
 from dataclasses import dataclass
 from dataclasses import field
 from enum import Enum
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
 from typing import Dict
@@ -22,9 +23,14 @@ from typing import Union
 from typing import get_args
 from typing import get_origin
 
+from _pytest.mark import Mark
 from _pytest.python import Metafunc
 
 from pytest_static.type_sets import PREDEFINED_TYPE_SETS
+
+
+if TYPE_CHECKING:
+    from _pytest.scope import _ScopeName
 
 
 T = TypeVar("T")
@@ -100,11 +106,11 @@ class ExpandedType(Generic[T]):
         """Returns a tuple of all possible instances of the primary_type."""
         signature: inspect.Signature = inspect.signature(self.primary_type)
         if len(signature.parameters) > 1:
-            return tuple(
-                self._instantiate_expanded(pc) for pc in parameter_combinations
+            return self._instantiate_combinations_using_expanded(
+                parameter_combinations=parameter_combinations
             )
-        return tuple(
-            self._instantiate_not_expanded(pc) for pc in parameter_combinations
+        return self._instantiate_combinations_using_not_expanded(
+            parameter_combinations=parameter_combinations
         )
 
     def _instantiate_from_trial_and_error(
@@ -112,20 +118,33 @@ class ExpandedType(Generic[T]):
     ) -> Tuple[T, ...]:
         """Returns a tuple of all possible instances of the primary_type."""
         try:
-            return tuple(
-                self._instantiate_expanded(pc) for pc in parameter_combinations
+            return self._instantiate_combinations_using_expanded(
+                parameter_combinations=parameter_combinations
             )
         except TypeError:
-            return tuple(
-                self._instantiate_not_expanded(pc) for pc in parameter_combinations
+            return self._instantiate_combinations_using_not_expanded(
+                parameter_combinations=parameter_combinations
             )
+
+    def _instantiate_combinations_using_expanded(
+        self, parameter_combinations: List[Tuple[Any, ...]]
+    ) -> Tuple[T, ...]:
+        """Returns a tuple of all possible instances of the primary_type."""
+        return tuple(self._instantiate_expanded(pc) for pc in parameter_combinations)
+
+    def _instantiate_combinations_using_not_expanded(
+        self, parameter_combinations: List[Tuple[Any, ...]]
+    ) -> Tuple[T, ...]:
+        """Returns a tuple of all possible instances of the primary_type."""
+        return tuple(
+            self._instantiate_not_expanded(pc) for pc in parameter_combinations
+        )
 
     def _instantiate_expanded(self, combination: Tuple[Any, ...]) -> T:
         """Returns an instance of the primary_type using the combination provided."""
         if self.primary_type is dict:
-            return {combination[0]: combination[1]}
-        else:
-            return self.primary_type(*combination)
+            return self.primary_type([combination])
+        return self.primary_type(*combination)
 
     def _instantiate_not_expanded(self, combination: Tuple[Any, ...]) -> T:
         """Returns an instance of the primary_type using the combination provided."""
@@ -150,9 +169,13 @@ def parametrize_types(
     metafunc: Metafunc,
     argnames: Union[str, Sequence[str]],
     argtypes: List[Type[T]],
-    ids: Optional[Union[Sequence[str], Callable]] = None,
-    *args,
-    **kwargs
+    indirect: Union[bool, Sequence[str]] = False,
+    ids: Optional[
+        Union[Iterable[Optional[object]], Callable[[Any], Optional[object]]]
+    ] = None,
+    scope: "Optional[_ScopeName]" = None,
+    *,
+    _param_mark: Optional[Mark] = None,
 ) -> None:
     """Parametrizes the provided argnames with the provided argtypes."""
     argnames = _ensure_sequence(argnames)
@@ -167,7 +190,14 @@ def parametrize_types(
     if ids is None:
         ids = [", ".join(map(repr, ic)) for ic in instance_combinations]
 
-    metafunc.parametrize(argnames, instance_combinations, ids=ids, *args, **kwargs)
+    metafunc.parametrize(
+        argnames=argnames,
+        argvalues=instance_combinations,
+        indirect=indirect,
+        ids=ids,
+        scope=scope,
+        _param_mark=_param_mark,
+    )
 
 
 def get_all_possible_type_instances(
