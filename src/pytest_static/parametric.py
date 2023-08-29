@@ -4,7 +4,6 @@ import itertools
 from dataclasses import dataclass
 from dataclasses import field
 from enum import Enum
-from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
 from typing import Dict
@@ -29,9 +28,8 @@ from _pytest.python import Metafunc
 from pytest_static.type_sets import PREDEFINED_TYPE_SETS
 
 
-if TYPE_CHECKING:
-    from _pytest.scope import _ScopeName
-
+# Redefines pytest's typing so that we can get 100% test coverage
+_ScopeName = Literal["session", "package", "module", "class", "function"]
 
 T = TypeVar("T")
 
@@ -176,7 +174,7 @@ def parametrize_types(
     ids: Optional[
         Union[Iterable[Optional[object]], Callable[[Any], Optional[object]]]
     ] = None,
-    scope: "Optional[_ScopeName]" = None,
+    scope: Optional[_ScopeName] = None,
     *,
     _param_mark: Optional[Mark] = None,
 ) -> None:

@@ -120,8 +120,15 @@ class TestExpandedType:
             == expected_combinations
         )
 
-    def test__instantiate_each_parameter_combination(self) -> None:
-        pass
+    @pytest.mark.parametrize(
+        argnames=["primary_type"], argvalues=[(dict,)], indirect=True
+    )
+    def test__instantiate_each_parameter_combination_with_builtin(
+        self, expanded_type: ExpandedType
+    ) -> None:
+        expanded_type._instantiate_each_parameter_combination(
+            parameter_combinations=[("foo", {"a": "b"})]
+        )
 
     def test__instantiate_from_signature(self) -> None:
         pass
