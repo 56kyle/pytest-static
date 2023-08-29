@@ -138,11 +138,26 @@ class TestExpandedType:
     def test__instantiate_expanded(self) -> None:
         pass
 
+    @pytest.mark.parametrize(
+        argnames=["primary_type", "type_args", "combination"],
+        argvalues=[
+            (list, (int,), (1,)),
+            (list, (int,), (1, 2)),
+        ],
+        ids=[
+            "single_type_arg",
+            "multiple_type_args",
+        ],
+        indirect=["primary_type", "type_args"],
+    )
     def test__instantiate_not_expanded(
         self,
         expanded_type: ExpandedType,
+        combination: Tuple[Any, ...],
     ) -> None:
-        pass
+        assert expanded_type._instantiate_not_expanded(
+            combination
+        ) == expanded_type.primary_type(combination)
 
 
 @pytest.mark.parametrize(
