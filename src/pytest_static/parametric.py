@@ -144,12 +144,14 @@ class ExpandedType(Generic[T]):
     def _instantiate_expanded(self, combination: Tuple[Any, ...]) -> T:
         """Returns an instance of the primary_type using the combination provided."""
         if self.primary_type is dict:
-            return self.primary_type([combination])
+            instantiation_method: Callable[..., T] = self.primary_type
+            return instantiation_method([combination])
         return self.primary_type(*combination)
 
     def _instantiate_not_expanded(self, combination: Tuple[Any, ...]) -> T:
         """Returns an instance of the primary_type using the combination provided."""
-        return self.primary_type(combination)
+        instantiation_method: Callable[..., T] = self.primary_type
+        return instantiation_method(combination)
 
 
 @dataclass(frozen=True)

@@ -15,13 +15,14 @@ from typing import Union
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
 
+from pytest_static import type_sets
 from pytest_static.parametric import Config
 from pytest_static.parametric import ExpandedType
 from pytest_static.parametric import expand_type
 from pytest_static.type_sets import PREDEFINED_TYPE_SETS
 
 
-T = TypeVar("T")
+T = TypeVar("T", bound=Any)
 
 
 class DummyClass:
@@ -42,8 +43,13 @@ class TestExpandedType:
         )
 
     def test_get_instances_with_multiple(self, monkeypatch: MonkeyPatch) -> None:
-        monkeypatch.setitem(PREDEFINED_TYPE_SETS, int, {1, 2})
-        monkeypatch.setitem(PREDEFINED_TYPE_SETS, str, {"a", "b"})
+        new_predefined_type_sets: Dict[Type[Any], Set[Any]] = {
+            **PREDEFINED_TYPE_SETS,
+            int: {1, 2},
+            str: {"a", "b"},
+        }
+        monkeypatch.setattr(type_sets, "PREDEFINED_TYPE_SETS", new_predefined_type_sets)
+
         expected_instances: Tuple[List[Union[int, str]], ...] = (
             [1, "a"],
             [1, "b"],
@@ -56,8 +62,13 @@ class TestExpandedType:
             assert instance in expanded_instances
 
     def test_get_instances_with_multiple_nested(self, monkeypatch: MonkeyPatch) -> None:
-        monkeypatch.setitem(PREDEFINED_TYPE_SETS, int, {1, 2})
-        monkeypatch.setitem(PREDEFINED_TYPE_SETS, str, {"a", "b"})
+        new_predefined_type_sets: Dict[Type[Any], Set[Any]] = {
+            **PREDEFINED_TYPE_SETS,
+            int: {1, 2},
+            str: {"a", "b"},
+        }
+        monkeypatch.setattr(type_sets, "PREDEFINED_TYPE_SETS", new_predefined_type_sets)
+
         expected_instances: Tuple[List[Union[List[int], str]], ...] = (
             [[1], "a"],
             [[1], "b"],
