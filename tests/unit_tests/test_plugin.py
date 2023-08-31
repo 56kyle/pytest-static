@@ -57,6 +57,72 @@ def parametrize_types_test(
     )
 
 
+def test_parametrize_types_with_unequal_names_and_types(
+    pytester: pytest.Pytester, conftest: Path
+) -> None:
+    test_path: Path = pytester.makepyfile(
+        """
+        import pytest
+        import typing
+        from typing import *
+
+        @pytest.mark.parametrize_types(
+            argnames=["a", "b"],
+            argtypes=[int, float, str],
+        )
+        def test_func(a, b) -> None:
+            assert a
+            assert b
+        """
+    )
+    result: pytest.RunResult = pytester.runpytest(test_path)
+    result.assert_outcomes(errors=1)
+
+
+def test_parametrize_types_with_no_ids_provided(
+    pytester: pytest.Pytester, conftest: Path
+) -> None:
+    test_path: Path = pytester.makepyfile(
+        """
+        import pytest
+        import typing
+        from typing import *
+
+        @pytest.mark.parametrize_types(
+            argnames=["a", "b"],
+            argtypes=[bool, bool],
+        )
+        def test_func(a, b) -> None:
+            assert a is not None
+            assert b is not None
+        """
+    )
+    result: pytest.RunResult = pytester.runpytest(test_path)
+    result.assert_outcomes(passed=4)
+
+
+def test_parametrize_types_with_argnames_as_string(
+    pytester: pytest.Pytester, conftest: Path
+) -> None:
+    test_path: Path = pytester.makepyfile(
+        """
+        import pytest
+        import typing
+        from typing import *
+
+        @pytest.mark.parametrize_types(
+            argnames="a, b",
+            argtypes=[bool, bool],
+        )
+        def test_func(a, b) -> None:
+            assert a is not None
+            assert b is not None
+        """
+    )
+    result: pytest.RunResult = pytester.runpytest(test_path)
+    result.assert_outcomes(passed=4)
+
+
 @pytest.mark.parametrize(
     argnames=["argtypes", "expected"],
     argvalues=[

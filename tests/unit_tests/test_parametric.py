@@ -121,20 +121,75 @@ class TestExpandedType:
         )
 
     @pytest.mark.parametrize(
-        argnames=["primary_type"], argvalues=[(dict,)], indirect=True
+        argnames=["primary_type"],
+        argvalues=[
+            (type,),
+        ],
+        indirect=True,
     )
     def test__instantiate_each_parameter_combination_with_builtin(
         self, expanded_type: ExpandedType
     ) -> None:
-        expanded_type._instantiate_each_parameter_combination(
-            parameter_combinations=[("foo", {"a": "b"})]
+        with pytest.raises(ValueError):
+            expanded_type._instantiate_each_parameter_combination(
+                parameter_combinations=[("foo", "bar")]
+            )
+
+    @pytest.mark.parametrize(
+        argnames=["primary_type", "type_args", "combinations", "expected"],
+        argvalues=[
+            (lambda: None, tuple(), tuple(), tuple()),
+            (list, (int,), ((1, 2),), ([1, 2],)),
+            (
+                lambda a, b, c: [a, b, c],
+                (bool, bool, bool),
+                ((True, False, True),),
+                ([True, False, True],),
+            ),
+        ],
+        ids=["no_parameters_sig", "one_parameter_sig", "many_parameters_sig"],
+        indirect=["primary_type", "type_args"],
+    )
+    def test__instantiate_from_signature(
+        self,
+        expanded_type: ExpandedType[T],
+        combinations: List[Tuple[Any, ...]],
+        expected: Tuple[T, ...],
+    ) -> None:
+        assert (
+            expanded_type._instantiate_from_signature(
+                parameter_combinations=combinations
+            )
+            == expected
         )
 
-    def test__instantiate_from_signature(self) -> None:
-        pass
-
-    def test__instantiate_from_trial_and_error(self) -> None:
-        pass
+    @pytest.mark.parametrize(
+        argnames=["primary_type", "type_args", "combinations", "expected"],
+        argvalues=[
+            (lambda: None, tuple(), tuple(), tuple()),
+            (list, (int,), ((1, 2),), ([1, 2],)),
+            (
+                lambda a, b, c: [a, b, c],
+                (bool, bool, bool),
+                ((True, False, True),),
+                ([True, False, True],),
+            ),
+        ],
+        ids=["no_parameters_sig", "one_parameter_sig", "many_parameters_sig"],
+        indirect=["primary_type", "type_args"],
+    )
+    def test__instantiate_from_trial_and_error(
+        self,
+        expanded_type: ExpandedType[T],
+        combinations: List[Tuple[Any, ...]],
+        expected: Tuple[T, ...],
+    ) -> None:
+        assert (
+            expanded_type._instantiate_from_trial_and_error(
+                parameter_combinations=combinations
+            )
+            == expected
+        )
 
     def test__instantiate_combinations_using_expanded(self) -> None:
         pass
