@@ -186,7 +186,9 @@ def parametrize_types(
     instance_sets: List[List[T]] = [
         list(get_all_possible_type_instances(t)) for t in argtypes
     ]
-    instance_combinations: List[List[T]] = list(itertools.product(*instance_sets))
+    instance_combinations: List[Iterable[itertools.product[Tuple[Any, ...]]]] = list(
+        itertools.product(*instance_sets)
+    )
 
     if ids is None:
         ids = [", ".join(map(repr, ic)) for ic in instance_combinations]

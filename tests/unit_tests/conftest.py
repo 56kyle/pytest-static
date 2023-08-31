@@ -28,7 +28,7 @@ def expanded_type(
 
 
 @pytest.fixture(scope="function")
-def primary_type(request: FixtureRequest) -> Type[T]:
+def primary_type(request: FixtureRequest) -> Type[Any]:
     return getattr(request, "param", List)
 
 

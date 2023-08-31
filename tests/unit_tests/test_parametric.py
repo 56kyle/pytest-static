@@ -87,16 +87,18 @@ class TestExpandedType:
     def test__get_parameter_instance_sets(
         self,
         primary_type: Type[T],
-        type_args: Type[T],
+        type_args: Tuple[Union[Any, ExpandedType[Any]], ...],
         expected_sets: Tuple[Set[Any], ...],
     ) -> None:
-        expected_sets = [tuple(expected_set) for expected_set in expected_sets]
+        expected: List[Tuple[Any, ...]] = [
+            tuple(iter(expected_set)) for expected_set in expected_sets
+        ]
         assert (
             ExpandedType(
                 primary_type=primary_type,
                 type_args=type_args,
             )._get_parameter_instance_sets()
-            == expected_sets
+            == expected
         )
 
     @pytest.mark.parametrize(
@@ -128,7 +130,7 @@ class TestExpandedType:
         indirect=True,
     )
     def test__instantiate_each_parameter_combination_with_builtin(
-        self, expanded_type: ExpandedType
+        self, expanded_type: ExpandedType[Any]
     ) -> None:
         with pytest.raises(ValueError):
             expanded_type._instantiate_each_parameter_combination(
@@ -203,8 +205,8 @@ class TestExpandedType:
     @pytest.mark.parametrize(
         argnames=["primary_type", "type_args", "combination"],
         argvalues=[
-            (list, (int,), (1,)),
-            (list, (int,), (1, 2)),
+            (list, (int,), (1, 2, 3)),
+            (list, (int, str), (1, "2", 3)),
         ],
         ids=[
             "single_type_arg",
@@ -214,11 +216,11 @@ class TestExpandedType:
     )
     def test__instantiate_not_expanded(
         self,
-        expanded_type: ExpandedType,
+        expanded_type: ExpandedType[List[Any]],
         combination: Tuple[Any, ...],
     ) -> None:
         assert expanded_type._instantiate_not_expanded(
-            combination
+            combination=combination
         ) == expanded_type.primary_type(combination)
 
 
