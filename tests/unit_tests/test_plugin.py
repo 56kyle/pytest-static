@@ -37,7 +37,7 @@ def parametrize_types_test(
     argnames: List[str] = [f"arg{i}" for i in range(len(argtypes))]
     argtypes_formatted: str = ", ".join([f"{argtype}" for argtype in argtypes])
     signature: str = ", ".join(
-        [f"{argname}" for argname, argtype in zip(argnames, argtypes, strict=True)]
+        [f"{argname}" for argname, argtype in zip(argnames, argtypes)]
     )
 
     return pytester.makepyfile(

@@ -63,7 +63,7 @@ class ExpandedType(Generic[T]):
         """Returns a list of parameter combinations."""
         if len(parameter_instance_sets) > 1:
             return list(itertools.product(*parameter_instance_sets))
-        return list(zip(*parameter_instance_sets, strict=True))
+        return list(zip(*parameter_instance_sets))
 
     def get_instances(self) -> Tuple[T, ...]:
         """Returns a tuple of all possible instances of the primary_type."""

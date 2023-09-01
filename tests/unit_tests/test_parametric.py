@@ -1,4 +1,3 @@
-from types import NoneType
 from typing import Any
 from typing import Dict
 from typing import FrozenSet
@@ -20,6 +19,9 @@ from pytest_static.parametric import Config
 from pytest_static.parametric import ExpandedType
 from pytest_static.parametric import expand_type
 from pytest_static.type_sets import PREDEFINED_TYPE_SETS
+
+
+NoneType: Type[None] = type(None)
 
 
 T = TypeVar("T", bound=Any)
