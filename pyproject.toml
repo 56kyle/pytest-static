@@ -18,7 +18,6 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: Software Development :: Testing",
     "Framework :: Pytest",
-    "Framework :: Pytest :: Plugin",
 ]
 
 [tool.poetry.urls]
