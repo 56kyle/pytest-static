@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pytest-static"
-version = "0.1.0"
+version = "0.2.0"
 description = "pytest-static"
 authors = ["Kyle Oliver <56kyleoliver@gmail.com>"]
 license = "MIT"
