@@ -15,7 +15,7 @@ import pytest
 from _pytest.monkeypatch import MonkeyPatch
 
 from pytest_static import type_sets
-from pytest_static.parametric import Config
+from pytest_static.config import Config
 from pytest_static.parametric import ExpandedType
 from pytest_static.parametric import expand_type
 from pytest_static.type_sets import PREDEFINED_TYPE_SETS

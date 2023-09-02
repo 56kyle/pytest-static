@@ -2,7 +2,6 @@
 import inspect
 import itertools
 from dataclasses import dataclass
-from dataclasses import field
 from enum import Enum
 from typing import Any
 from typing import Callable
@@ -25,6 +24,7 @@ from typing import get_origin
 from _pytest.mark import Mark
 from _pytest.python import Metafunc
 
+from pytest_static.config import Config
 from pytest_static.type_sets import PREDEFINED_TYPE_SETS
 
 
@@ -152,17 +152,6 @@ class ExpandedType(Generic[T]):
         """Returns an instance of the primary_type using the combination provided."""
         instantiation_method: Callable[..., T] = self.primary_type
         return instantiation_method(combination)
-
-
-@dataclass(frozen=True)
-class Config:
-    """A dataclass used to configure the expansion of types."""
-
-    max_elements: int = 5
-    max_depth: int = 5
-    custom_handlers: Dict[
-        Any, Callable[[Type[T], "Config"], Set[Union[Any, ExpandedType[T]]]]
-    ] = field(default_factory=dict)
 
 
 DEFAULT_CONFIG: Config = Config()
