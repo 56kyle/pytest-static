@@ -83,7 +83,7 @@ class TestExpandedType:
             assert instance in expanded_instances
 
     @pytest.mark.parametrize(
-        argnames=["primary_type", "type_args", "expected_sets"],
+        argnames=["base_type", "type_arguments", "expected_sets"],
         argvalues=[
             (
                 List,
@@ -97,10 +97,10 @@ class TestExpandedType:
         ],
         ids=["nested_param", "sum_param", "product_param"],
     )
-    def test__get_parameter_instance_sets(
+    def test__get_argument_sets(
         self,
-        primary_type: Type[T],
-        type_args: Tuple[Union[Any, ExpandedType[Any]], ...],
+        base_type,
+        type_arguments,
         expected_sets: Tuple[Set[Any], ...],
     ) -> None:
         expected: List[Tuple[Any, ...]] = [
@@ -108,9 +108,9 @@ class TestExpandedType:
         ]
         assert (
             ExpandedType(
-                primary_type=primary_type,
-                type_args=type_args,
-            )._get_parameter_instance_sets()
+                base_type=base_type,
+                type_arguments=type_arguments,
+            )._get_argument_sets()
             == expected
         )
 
@@ -125,33 +125,30 @@ class TestExpandedType:
             "multiple_sets",
         ],
     )
-    def test__get_parameter_combinations(
+    def test__get_combinations(
         self,
         instance_sets: List[Tuple[T, ...]],
         expected_combinations: List[Tuple[Any, ...]],
     ) -> None:
-        assert (
-            ExpandedType._get_parameter_combinations(instance_sets)
-            == expected_combinations
-        )
+        assert ExpandedType._get_combinations(instance_sets) == expected_combinations
 
     @pytest.mark.parametrize(
-        argnames=["primary_type"],
+        argnames=["base_type"],
         argvalues=[
             (type,),
         ],
         indirect=True,
     )
-    def test__instantiate_each_parameter_combination_with_builtin(
+    def test__instantiate_combinations_with_builtin(
         self, expanded_type: ExpandedType[Any]
     ) -> None:
         with pytest.raises(ValueError):
-            expanded_type._instantiate_each_parameter_combination(
-                parameter_combinations=[("foo", "bar")]
+            expanded_type._instantiate_combinations(
+                argument_combinations=[("foo", "bar")]
             )
 
     @pytest.mark.parametrize(
-        argnames=["primary_type", "type_args", "combinations", "expected"],
+        argnames=["base_type", "type_arguments", "combinations", "expected"],
         argvalues=[
             (lambda: None, tuple(), tuple(), tuple()),
             (list, (int,), ((1, 2),), ([1, 2],)),
@@ -163,7 +160,7 @@ class TestExpandedType:
             ),
         ],
         ids=["no_parameters_sig", "one_parameter_sig", "many_parameters_sig"],
-        indirect=["primary_type", "type_args"],
+        indirect=["base_type", "type_arguments"],
     )
     def test__instantiate_from_signature(
         self,
@@ -173,13 +170,13 @@ class TestExpandedType:
     ) -> None:
         assert (
             expanded_type._instantiate_from_signature(
-                parameter_combinations=combinations
+                argument_combinations=combinations
             )
             == expected
         )
 
     @pytest.mark.parametrize(
-        argnames=["primary_type", "type_args", "combinations", "expected"],
+        argnames=["base_type", "type_arguments", "combinations", "expected"],
         argvalues=[
             (lambda: None, tuple(), tuple(), tuple()),
             (list, (int,), ((1, 2),), ([1, 2],)),
@@ -191,32 +188,30 @@ class TestExpandedType:
             ),
         ],
         ids=["no_parameters_sig", "one_parameter_sig", "many_parameters_sig"],
-        indirect=["primary_type", "type_args"],
+        indirect=["base_type", "type_arguments"],
     )
-    def test__instantiate_from_trial_and_error(
+    def test__instantiate_error_handler(
         self,
         expanded_type: ExpandedType[T],
         combinations: List[Tuple[Any, ...]],
         expected: Tuple[T, ...],
     ) -> None:
         assert (
-            expanded_type._instantiate_from_trial_and_error(
-                parameter_combinations=combinations
-            )
+            expanded_type._instantiate_error_handler(argument_combinations=combinations)
             == expected
         )
 
-    def test__instantiate_combinations_using_expanded(self) -> None:
+    def test__handle_multiple_signature(self) -> None:
         pass
 
-    def test__instantiate_combinations_using_not_expanded(self) -> None:
+    def test__handle_single_signature(self) -> None:
         pass
 
-    def test__instantiate_expanded(self) -> None:
+    def test__instantiate_complex_type(self) -> None:
         pass
 
     @pytest.mark.parametrize(
-        argnames=["primary_type", "type_args", "combination"],
+        argnames=["base_type", "type_arguments", "combination"],
         argvalues=[
             (list, (int,), (1, 2, 3)),
             (list, (int, str), (1, "2", 3)),
@@ -225,16 +220,16 @@ class TestExpandedType:
             "single_type_arg",
             "multiple_type_args",
         ],
-        indirect=["primary_type", "type_args"],
+        indirect=["base_type", "type_arguments"],
     )
-    def test__instantiate_not_expanded(
+    def test__instantiate_basic_type(
         self,
         expanded_type: ExpandedType[List[Any]],
         combination: Tuple[Any, ...],
     ) -> None:
-        assert expanded_type._instantiate_not_expanded(
-            combination=combination
-        ) == expanded_type.primary_type(combination)
+        assert expanded_type._instantiate_basic_type(
+            arguments=combination
+        ) == expanded_type.base_type(combination)
 
 
 @pytest.mark.parametrize(
@@ -430,5 +425,5 @@ def test_custom_handler() -> None:
     ) -> Set[Union[Any, ExpandedType[T]]]:
         return {int}
 
-    config: Config = Config(max_elements=5, custom_handlers={list: custom_handler})
+    config: Config = Config(max_elements_count=5, type_handlers={list: custom_handler})
     assert expand_type(List[str], config) == {int}

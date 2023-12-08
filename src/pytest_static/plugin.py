@@ -17,5 +17,5 @@ def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line(
         "markers",
         "parametrize_types(argnames, types, ids, *args, **kwargs):"
-        " Generate parametrized tests for the given argnames and types in argvalues.",
+        " Generate parametrized tests for the given argnames and types in argtypes.",
     )
