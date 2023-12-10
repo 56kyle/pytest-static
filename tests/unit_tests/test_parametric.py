@@ -2,7 +2,6 @@ from typing import Any
 from typing import Dict
 from typing import FrozenSet
 from typing import List
-from typing import Literal
 from typing import Optional
 from typing import Sequence
 from typing import Set
@@ -15,10 +14,9 @@ import pytest
 from _pytest.monkeypatch import MonkeyPatch
 
 from pytest_static import type_sets
-from pytest_static.parametric import Config
 from pytest_static.parametric import ExpandedType
 from pytest_static.parametric import expand_type
-from pytest_static.type_sets import PREDEFINED_TYPE_SETS
+from pytest_static.type_sets import PREDEFINED_INSTANCE_SETS
 
 
 NoneType: Type[None] = type(None)
@@ -27,7 +25,7 @@ NoneType: Type[None] = type(None)
 T = TypeVar("T", bound=Any)
 
 
-class DummyClass:
+class DummyClassNoArgs:
     pass
 
 
@@ -35,22 +33,24 @@ class TestExpandedType:
     def test_get_instances_with_basic(self) -> None:
         expanded_type = ExpandedType(list, (int,))
         assert expanded_type.get_instances() == tuple(
-            [value] for value in PREDEFINED_TYPE_SETS[int]
+            [value] for value in PREDEFINED_INSTANCE_SETS[int]
         )
 
     def test_get_instances_with_nested(self) -> None:
         expanded_type = ExpandedType(list, (ExpandedType(list, (int,)),))
         assert expanded_type.get_instances() == tuple(
-            [[value]] for value in PREDEFINED_TYPE_SETS[int]
+            [[value]] for value in PREDEFINED_INSTANCE_SETS[int]
         )
 
     def test_get_instances_with_multiple(self, monkeypatch: MonkeyPatch) -> None:
         new_predefined_type_sets: Dict[Type[Any], Set[Any]] = {
-            **PREDEFINED_TYPE_SETS,
+            **PREDEFINED_INSTANCE_SETS,
             int: {1, 2},
             str: {"a", "b"},
         }
-        monkeypatch.setattr(type_sets, "PREDEFINED_TYPE_SETS", new_predefined_type_sets)
+        monkeypatch.setattr(
+            type_sets, "PREDEFINED_INSTANCE_SETS", new_predefined_type_sets
+        )
 
         expected_instances: Tuple[List[Union[int, str]], ...] = (
             [1, "a"],
@@ -65,11 +65,13 @@ class TestExpandedType:
 
     def test_get_instances_with_multiple_nested(self, monkeypatch: MonkeyPatch) -> None:
         new_predefined_type_sets: Dict[Type[Any], Set[Any]] = {
-            **PREDEFINED_TYPE_SETS,
+            **PREDEFINED_INSTANCE_SETS,
             int: {1, 2},
             str: {"a", "b"},
         }
-        monkeypatch.setattr(type_sets, "PREDEFINED_TYPE_SETS", new_predefined_type_sets)
+        monkeypatch.setattr(
+            type_sets, "PREDEFINED_INSTANCE_SETS", new_predefined_type_sets
+        )
 
         expected_instances: Tuple[List[Union[List[int], str]], ...] = (
             [[1], "a"],
@@ -89,18 +91,26 @@ class TestExpandedType:
                 List,
                 (int,),
                 [
-                    PREDEFINED_TYPE_SETS[int],
+                    PREDEFINED_INSTANCE_SETS[int],
                 ],
             ),
-            (Union, (int, str), [PREDEFINED_TYPE_SETS[int], PREDEFINED_TYPE_SETS[str]]),
-            (Tuple, (int, str), [PREDEFINED_TYPE_SETS[int], PREDEFINED_TYPE_SETS[str]]),
+            (
+                Union,
+                (int, str),
+                [PREDEFINED_INSTANCE_SETS[int], PREDEFINED_INSTANCE_SETS[str]],
+            ),
+            (
+                Tuple,
+                (int, str),
+                [PREDEFINED_INSTANCE_SETS[int], PREDEFINED_INSTANCE_SETS[str]],
+            ),
         ],
         ids=["nested_param", "sum_param", "product_param"],
     )
     def test__get_argument_sets(
         self,
-        base_type,
-        type_arguments,
+        base_type: Type[T],
+        type_arguments: Tuple[Union[Any, ExpandedType[Any]], ...],
         expected_sets: Tuple[Set[Any], ...],
     ) -> None:
         expected: List[Tuple[Any, ...]] = [
@@ -235,7 +245,8 @@ class TestExpandedType:
 @pytest.mark.parametrize(
     argnames=["type_arg", "expected"],
     argvalues=[
-        ((DummyClass), {DummyClass}),
+        ((DummyClassNoArgs), {ExpandedType(DummyClassNoArgs, tuple())}),
+        ((DummyClassNoArgs), {ExpandedType(DummyClassNoArgs, tuple())}),
     ],
 )
 def test_expand_type_with_non_supported_type(
@@ -297,7 +308,6 @@ def test_expand_type_with_product_types(
     argvalues=[
         (Union[int, str], [int, str]),
         (Union[int, str, float], [int, str, float]),
-        (Literal["a", "b", "c"], [Literal["a", "b", "c"]]),
         (Optional[int], [int, NoneType]),
         (Optional[Optional[int]], [int, NoneType]),
         (Optional[Union[int, str]], [int, str, NoneType]),
@@ -401,29 +411,19 @@ def test_expand_type_with_combinations(
 
 
 def test_optional_expansion() -> None:
-    result: Set[Union[Any, ExpandedType[Any]]] = expand_type(Optional[int])
+    result: Set[Any] = expand_type(Optional[int])
     assert NoneType in result
     assert int in result
 
 
 def test_union_expansion() -> None:
-    result: Set[Union[Any, ExpandedType[Any]]] = expand_type(Union[int, str])
+    result: Set[ExpandedType[Any]] = expand_type(Union[int, str])
     assert NoneType not in result
     assert int in result
     assert str in result
 
 
 def test_expanded_type() -> None:
-    result: Set[Union[Any, ExpandedType[Any]]] = expand_type(Dict[str, Optional[int]])
+    result: Set[Any] = expand_type(Dict[str, Optional[int]])
     assert ExpandedType(dict, (str, int)) in result
     assert ExpandedType(dict, (str, NoneType)) in result
-
-
-def test_custom_handler() -> None:
-    def custom_handler(
-        type_arg: Type[T], config: Config
-    ) -> Set[Union[Any, ExpandedType[T]]]:
-        return {int}
-
-    config: Config = Config(max_elements_count=5, type_handlers={list: custom_handler})
-    assert expand_type(List[str], config) == {int}

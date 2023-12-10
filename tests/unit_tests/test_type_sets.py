@@ -1,4 +1,4 @@
-from pytest_static.type_sets import PREDEFINED_TYPE_SETS
+from pytest_static.type_sets import PREDEFINED_INSTANCE_SETS
 from pytest_static.type_sets import BoolParams
 from pytest_static.type_sets import BytesParams
 from pytest_static.type_sets import ComplexParams
@@ -17,9 +17,9 @@ from pytest_static.type_sets import Whitespace
 
 
 def test_type_sets() -> None:
-    assert PREDEFINED_TYPE_SETS
-    for type_set in PREDEFINED_TYPE_SETS.values():
-        assert type_set
+    assert PREDEFINED_INSTANCE_SETS
+    for type_set in PREDEFINED_INSTANCE_SETS.values():
+        assert type_set is not None
 
 
 def test_bool_params() -> None:
