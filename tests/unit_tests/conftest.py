@@ -1,8 +1,6 @@
 from typing import Any
 from typing import List
 from typing import Tuple
-from typing import Type
-from typing import Union
 
 import pytest
 from _pytest.fixtures import FixtureRequest
@@ -14,8 +12,8 @@ from pytest_static.parametric import T
 @pytest.fixture(scope="function")
 def expanded_type(
     request: FixtureRequest,
-    base_type: Type[T],
-    type_arguments: Tuple[Union[Any, ExpandedType[Any]], ...],
+    base_type: T,
+    type_arguments: Tuple[Any, ...],
 ) -> ExpandedType[T]:
     return getattr(
         request,
@@ -28,12 +26,12 @@ def expanded_type(
 
 
 @pytest.fixture(scope="function")
-def base_type(request: FixtureRequest) -> Type[Any]:
+def base_type(request: FixtureRequest) -> Any:
     return getattr(request, "param", List)
 
 
 @pytest.fixture(scope="function")
 def type_arguments(
     request: FixtureRequest,
-) -> Tuple[Union[Any, ExpandedType[Any]], ...]:
+) -> Tuple[Any, ...]:
     return getattr(request, "param", (int,))

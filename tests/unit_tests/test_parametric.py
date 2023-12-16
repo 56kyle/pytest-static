@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any
 from typing import Dict
 from typing import FrozenSet
@@ -6,7 +8,6 @@ from typing import Optional
 from typing import Sequence
 from typing import Set
 from typing import Tuple
-from typing import Type
 from typing import TypeVar
 from typing import Union
 
@@ -19,7 +20,7 @@ from pytest_static.parametric import expand_type
 from pytest_static.type_sets import PREDEFINED_INSTANCE_SETS
 
 
-NoneType: Type[None] = type(None)
+NoneType: type[None] = type(None)
 
 
 T = TypeVar("T", bound=Any)
@@ -43,7 +44,7 @@ class TestExpandedType:
         )
 
     def test_get_instances_with_multiple(self, monkeypatch: MonkeyPatch) -> None:
-        new_predefined_type_sets: Dict[Type[Any], Set[Any]] = {
+        new_predefined_type_sets: dict[type[Any], set[Any]] = {
             **PREDEFINED_INSTANCE_SETS,
             int: {1, 2},
             str: {"a", "b"},
@@ -52,19 +53,19 @@ class TestExpandedType:
             type_sets, "PREDEFINED_INSTANCE_SETS", new_predefined_type_sets
         )
 
-        expected_instances: Tuple[List[Union[int, str]], ...] = (
+        expected_instances: tuple[list[int | str], ...] = (
             [1, "a"],
             [1, "b"],
             [2, "a"],
             [2, "b"],
         )
-        expanded_type: ExpandedType[List[Any]] = ExpandedType(list, (int, str))
-        expanded_instances: Tuple[List[Any], ...] = expanded_type.get_instances()
+        expanded_type: ExpandedType[type[list[Any]]] = ExpandedType(list, (int, str))
+        expanded_instances: tuple[list[Any], ...] = expanded_type.get_instances()
         for instance in expected_instances:
             assert instance in expanded_instances
 
     def test_get_instances_with_multiple_nested(self, monkeypatch: MonkeyPatch) -> None:
-        new_predefined_type_sets: Dict[Type[Any], Set[Any]] = {
+        new_predefined_type_sets: dict[type[Any], set[Any]] = {
             **PREDEFINED_INSTANCE_SETS,
             int: {1, 2},
             str: {"a", "b"},
@@ -73,14 +74,16 @@ class TestExpandedType:
             type_sets, "PREDEFINED_INSTANCE_SETS", new_predefined_type_sets
         )
 
-        expected_instances: Tuple[List[Union[List[int], str]], ...] = (
+        expected_instances: tuple[list[list[int] | str], ...] = (
             [[1], "a"],
             [[1], "b"],
             [[2], "a"],
             [[2], "b"],
         )
-        expanded_type = ExpandedType(list, (ExpandedType(list, (int,)), str))
-        expanded_instances: Tuple[List[Any], ...] = expanded_type.get_instances()
+        expanded_type: ExpandedType[Any] = ExpandedType(
+            list, (ExpandedType(list, (int,)), str)
+        )
+        expanded_instances: tuple[Any, ...] = expanded_type.get_instances()
         for instance in expected_instances:
             assert instance in expanded_instances
 
@@ -109,11 +112,11 @@ class TestExpandedType:
     )
     def test__get_argument_sets(
         self,
-        base_type: Type[T],
-        type_arguments: Tuple[Union[Any, ExpandedType[Any]], ...],
-        expected_sets: Tuple[Set[Any], ...],
+        base_type: type[T],
+        type_arguments: tuple[Any | ExpandedType[Any], ...],
+        expected_sets: tuple[set[Any], ...],
     ) -> None:
-        expected: List[Tuple[Any, ...]] = [
+        expected: list[tuple[Any, ...]] = [
             tuple(iter(expected_set)) for expected_set in expected_sets
         ]
         assert (
@@ -137,8 +140,8 @@ class TestExpandedType:
     )
     def test__get_combinations(
         self,
-        instance_sets: List[Tuple[T, ...]],
-        expected_combinations: List[Tuple[Any, ...]],
+        instance_sets: list[tuple[T, ...]],
+        expected_combinations: list[tuple[Any, ...]],
     ) -> None:
         assert ExpandedType._get_combinations(instance_sets) == expected_combinations
 
@@ -175,8 +178,8 @@ class TestExpandedType:
     def test__instantiate_from_signature(
         self,
         expanded_type: ExpandedType[T],
-        combinations: List[Tuple[Any, ...]],
-        expected: Tuple[T, ...],
+        combinations: list[tuple[Any, ...]],
+        expected: tuple[T, ...],
     ) -> None:
         assert (
             expanded_type._instantiate_from_signature(
@@ -203,8 +206,8 @@ class TestExpandedType:
     def test__instantiate_error_handler(
         self,
         expanded_type: ExpandedType[T],
-        combinations: List[Tuple[Any, ...]],
-        expected: Tuple[T, ...],
+        combinations: list[tuple[Any, ...]],
+        expected: tuple[T, ...],
     ) -> None:
         assert (
             expanded_type._instantiate_error_handler(argument_combinations=combinations)
@@ -234,8 +237,8 @@ class TestExpandedType:
     )
     def test__instantiate_basic_type(
         self,
-        expanded_type: ExpandedType[List[Any]],
-        combination: Tuple[Any, ...],
+        expanded_type: ExpandedType[T],
+        combination: tuple[Any, ...],
     ) -> None:
         assert expanded_type._instantiate_basic_type(
             arguments=combination
@@ -250,9 +253,8 @@ class TestExpandedType:
     ],
 )
 def test_expand_type_with_non_supported_type(
-    type_arg: Type[T], expected: Set[Type[T]]
+    type_arg: type[T], expected: set[type[T]]
 ) -> None:
-
     assert expand_type(type_arg) == expected
 
 
@@ -268,7 +270,7 @@ def test_expand_type_with_non_supported_type(
         (type(None), {NoneType}),
     ],
 )
-def test_base_types(type_arg: Type[T], expected: Set[Type[T]]) -> None:
+def test_base_types(type_arg: type[T], expected: set[type[T]]) -> None:
 
     assert expand_type(type_arg) == expected
 
@@ -297,7 +299,7 @@ def test_base_types(type_arg: Type[T], expected: Set[Type[T]]) -> None:
     ids=lambda x: str(x),
 )
 def test_expand_type_with_product_types(
-    type_arg: Type[T], expected: Sequence[Any]
+    type_arg: type[T], expected: Sequence[Any]
 ) -> None:
 
     assert expand_type(type_arg) == {*expected}
@@ -314,7 +316,7 @@ def test_expand_type_with_product_types(
     ],
     ids=lambda x: str(x),
 )
-def test_expand_type_with_sum_types(type_arg: Type[T], expected: Sequence[Any]) -> None:
+def test_expand_type_with_sum_types(type_arg: type[T], expected: Sequence[Any]) -> None:
 
     assert expand_type(type_arg) == {*expected}
 
@@ -337,7 +339,7 @@ def test_expand_type_with_sum_types(type_arg: Type[T], expected: Sequence[Any]) 
     ids=lambda x: str(x),
 )
 def test_expand_type_with_recursive_types(
-    type_arg: Type[T], expected: Sequence[Any]
+    type_arg: type[T], expected: Sequence[Any]
 ) -> None:
     assert expand_type(type_arg) == {*expected}
 
@@ -405,25 +407,28 @@ def test_expand_type_with_recursive_types(
     ids=lambda x: str(x),
 )
 def test_expand_type_with_combinations(
-    type_arg: Type[T], expected: Sequence[Any]
+    type_arg: type[T], expected: Sequence[Any]
 ) -> None:
     assert expand_type(type_arg) == {*expected}
 
 
 def test_optional_expansion() -> None:
-    result: Set[Any] = expand_type(Optional[int])
+    result: set[Any] = expand_type(Optional[int])
     assert NoneType in result
     assert int in result
 
 
 def test_union_expansion() -> None:
-    result: Set[ExpandedType[Any]] = expand_type(Union[int, str])
+    result: set[Any] = expand_type(Union[int, str])
     assert NoneType not in result
     assert int in result
     assert str in result
 
 
 def test_expanded_type() -> None:
-    result: Set[Any] = expand_type(Dict[str, Optional[int]])
+    result: set[ExpandedType[type[dict[str, int | None]]]] = expand_type(
+        Dict[str, Optional[int]]
+    )
+
     assert ExpandedType(dict, (str, int)) in result
     assert ExpandedType(dict, (str, NoneType)) in result
