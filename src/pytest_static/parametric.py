@@ -87,7 +87,7 @@ class ExpandedType(Generic[T_co]):
             return list(itertools.product(*argument_sets))
         return list(zip(*argument_sets))
 
-    def get_instances(self) -> tuple[Any, ...]:
+    def get_instances(self) -> tuple[T_co, ...]:
         """Gets instances of the class based on defined argument sets.
 
         Returns:
@@ -96,15 +96,30 @@ class ExpandedType(Generic[T_co]):
         if self.base_type in PREDEFINED_INSTANCE_SETS.keys():
             return tuple(PREDEFINED_INSTANCE_SETS[self.base_type])
 
-        if self.base_type is Literal:
-            return self.type_arguments
+        if self.base_type in [Literal, _LiteralSpecialForm]:
+            instances: list[T_co] = []
+            for arg in self.type_arguments:
+                if isinstance(arg, ExpandedType):
+                    instances.extend(arg.get_instances())
+                elif arg in PREDEFINED_INSTANCE_SETS.keys():
+                    instances.extend(PREDEFINED_INSTANCE_SETS[arg])
+                else:
+                    raise TypeError(
+                        f"Failed to find acceptable type for Literal "
+                        f"type arg: {arg}"
+                    )
+            return tuple(instances)
 
-        argument_sets: list[tuple[T_co, ...]] = self._get_argument_sets()
+        # (int, str) => [(1, 2), ("a", "b")]
+        argument_sets: list[tuple[T_co, ...]] = self._get_instances_for_each_argument()
 
+        # [(1, 2), ("a", "b")] => [(1, "a"), (1, "b"), (2, "a"), (2, "b")]
         combinations: list[tuple[Any, ...]] = self._get_combinations(argument_sets)
 
-        instances: tuple[T_co, ...] = self._instantiate_combinations(combinations)
-        return instances
+        base_type_instances: tuple[T_co, ...] = self._instantiate_combinations(
+            combinations
+        )
+        return base_type_instances
 
     def _casted_base_type_as_callable(self) -> Callable[..., T_co]:
         self._ensure_base_type_callable()
@@ -114,7 +129,7 @@ class ExpandedType(Generic[T_co]):
         if not callable(self.base_type):
             raise ExpandedTypeNotCallableError(self.base_type)
 
-    def _get_argument_sets(self) -> list[tuple[T_co, ...]]:
+    def _get_instances_for_each_argument(self) -> list[tuple[T_co, ...]]:
         argument_instances: list[tuple[T_co, ...]] = []
         for argument in self.type_arguments:
             if isinstance(argument, ExpandedType):
@@ -185,7 +200,7 @@ def parametrize_types(
     argnames: str | Sequence[str],
     argtypes: list[type[T]],
     indirect: bool | Sequence[str] = False,
-    ids: None | (Iterable[object | None] | Callable[[Any], object | None]) = None,
+    ids: Iterable[object | None] | Callable[[Any], object | None] | None = None,
     scope: _ScopeName | None = None,
     *,
     _param_mark: Mark | None = None,
@@ -244,8 +259,12 @@ def get_all_possible_type_instances(type_argument: type[T]) -> tuple[T, ...]:
     for expanded_type in expanded_types:
         if isinstance(expanded_type, ExpandedType):
             instances.extend(expanded_type.get_instances())
+        elif expanded_type in PREDEFINED_INSTANCE_SETS.keys():
+            instances.extend(PREDEFINED_INSTANCE_SETS[expanded_type])
         else:
-            instances.extend(PREDEFINED_INSTANCE_SETS.get(expanded_type, []))
+            raise TypeError(
+                f"Failed to find matching instance for type {expanded_type}."
+            )
     return tuple(instances)
 
 
@@ -276,13 +295,6 @@ def expand_type(type_argument: Enum) -> set[ExpandedType[Enum]]:
 
 
 @overload
-def expand_type(
-    type_argument: type[dict[KT, VT]]
-) -> set[ExpandedType[type[dict[KT, VT]]]]:
-    ...
-
-
-@overload
 def expand_type(type_argument: type[T]) -> set[ExpandedType[type[T]] | type[T]]:
     ...
 
@@ -306,7 +318,7 @@ def expand_type(type_argument: Any) -> set[Any]:
 
 
 def expand_literal_type(
-    type_argument: type[_SpecialForm],
+    type_argument: type[_LiteralSpecialForm],
 ) -> set[ExpandedType[Any]]:
     """Expands the provided Literal type.
 
@@ -317,7 +329,9 @@ def expand_literal_type(
         A set of expanded types.
     """
     return {
-        ExpandedType(base_type=type_argument, type_arguments=get_args(type_argument))
+        ExpandedType(
+            base_type=get_origin(type_argument), type_arguments=get_args(type_argument)
+        )
     }
 
 

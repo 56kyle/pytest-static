@@ -6,15 +6,15 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 
 from pytest_static.parametric import ExpandedType
-from pytest_static.parametric import T
+from pytest_static.parametric import T_co
 
 
 @pytest.fixture(scope="function")
 def expanded_type(
     request: FixtureRequest,
-    base_type: T,
+    base_type: T_co,
     type_arguments: Tuple[Any, ...],
-) -> ExpandedType[T]:
+) -> ExpandedType[T_co]:
     return getattr(
         request,
         "param",

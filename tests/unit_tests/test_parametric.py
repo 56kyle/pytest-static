@@ -13,9 +13,11 @@ from typing import Union
 
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
+from typing_extensions import Literal
 
 from pytest_static import type_sets
 from pytest_static.parametric import ExpandedType
+from pytest_static.parametric import T_co
 from pytest_static.parametric import expand_type
 from pytest_static.type_sets import PREDEFINED_INSTANCE_SETS
 
@@ -31,16 +33,50 @@ class DummyClassNoArgs:
 
 
 class TestExpandedType:
-    def test_get_instances_with_basic(self) -> None:
-        expanded_type = ExpandedType(list, (int,))
+    @pytest.mark.parametrize(
+        argnames=["base_type", "type_arguments"],
+        argvalues=[(int, tuple()), (float, tuple())],
+        indirect=True,
+    )
+    def test_get_instances_with_basic(self, expanded_type: ExpandedType[T]) -> None:
+        assert expanded_type.get_instances() == tuple(
+            PREDEFINED_INSTANCE_SETS[expanded_type.base_type]
+        )
+
+    def test_get_instances_with_basic_covariant(self) -> None:
+        expanded_type: ExpandedType[list[int]] = ExpandedType(list, (int,))
         assert expanded_type.get_instances() == tuple(
             [value] for value in PREDEFINED_INSTANCE_SETS[int]
         )
 
+    @pytest.mark.parametrize(
+        argnames=["base_type", "type_arguments"],
+        argvalues=[
+            (
+                Literal,
+                (1, 2, 3),
+            ),
+            (
+                Literal,
+                (Literal[1, 2], 3),
+            ),
+            (
+                Literal,
+                (Literal[1, 2], Literal[2, 3]),
+            ),
+        ],
+        ids=["basic", "nested_literal", "overlapping_nested_literal"],
+        indirect=True,
+    )
+    def test_get_instances_with_literal(
+        self, expanded_type: ExpandedType[Literal]
+    ) -> None:
+        assert expanded_type.get_instances() == (1, 2, 3)
+
     def test_get_instances_with_nested(self) -> None:
         expanded_type = ExpandedType(list, (ExpandedType(list, (int,)),))
         assert expanded_type.get_instances() == tuple(
-            [[value]] for value in PREDEFINED_INSTANCE_SETS[int]
+            [value] for value in PREDEFINED_INSTANCE_SETS[int]
         )
 
     def test_get_instances_with_multiple(self, monkeypatch: MonkeyPatch) -> None:
@@ -110,10 +146,10 @@ class TestExpandedType:
         ],
         ids=["nested_param", "sum_param", "product_param"],
     )
-    def test__get_argument_sets(
+    def test__get_instances_for_each_argument(
         self,
-        base_type: type[T],
-        type_arguments: tuple[Any | ExpandedType[Any], ...],
+        base_type: type[T_co],
+        type_arguments: tuple[Any, ...],
         expected_sets: tuple[set[Any], ...],
     ) -> None:
         expected: list[tuple[Any, ...]] = [
@@ -123,7 +159,7 @@ class TestExpandedType:
             ExpandedType(
                 base_type=base_type,
                 type_arguments=type_arguments,
-            )._get_argument_sets()
+            )._get_instances_for_each_argument()
             == expected
         )
 
