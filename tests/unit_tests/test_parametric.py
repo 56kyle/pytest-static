@@ -58,11 +58,11 @@ class TestExpandedType:
             ),
             (
                 Literal,
-                (Literal[1, 2], 3),
+                (ExpandedType(Literal, (1, 2)), 3),
             ),
             (
                 Literal,
-                (Literal[1, 2], Literal[2, 3]),
+                (ExpandedType(Literal, (1, 2)), ExpandedType(Literal, (2, 3))),
             ),
         ],
         ids=["basic", "nested_literal", "overlapping_nested_literal"],
@@ -76,7 +76,7 @@ class TestExpandedType:
     def test_get_instances_with_nested(self) -> None:
         expanded_type = ExpandedType(list, (ExpandedType(list, (int,)),))
         assert expanded_type.get_instances() == tuple(
-            [value] for value in PREDEFINED_INSTANCE_SETS[int]
+            [[value]] for value in PREDEFINED_INSTANCE_SETS[int]
         )
 
     def test_get_instances_with_multiple(self, monkeypatch: MonkeyPatch) -> None:

@@ -74,10 +74,20 @@ PRODUCT_TYPES_SET: set[Any] = {
 
 @dataclass(frozen=True)
 class ExpandedType(Generic[T_co]):
-    """A dataclass representing a type with expanded type arguments."""
+    """A dataclass representing a type with expanded type arguments.
+
+    The type_arguments passed in must be fully expanded to begin with.
+    """
 
     base_type: T_co
     type_arguments: tuple[Any, ...]
+
+    def __post_init__(self) -> None:
+        """Validates the type was expanded already."""
+        if self.base_type is Literal:
+            self._validate_literal_type_arguments()
+        else:
+            self._validate_normal_type_arguments()
 
     @staticmethod
     def _get_combinations(
@@ -86,6 +96,25 @@ class ExpandedType(Generic[T_co]):
         if len(argument_sets) > 1:
             return list(itertools.product(*argument_sets))
         return list(zip(*argument_sets))
+
+    def _validate_literal_type_arguments(self) -> None:
+        for type_argument in self.type_arguments:
+            if isinstance(type_argument, ExpandedType):
+                continue
+            if type(type_argument) in PREDEFINED_INSTANCE_SETS.keys():
+                continue
+            raise TypeError(f"Invalid type_arg for use with Literal: {type_argument}")
+
+    def _validate_normal_type_arguments(self) -> None:
+        for type_argument in self.type_arguments:
+            if isinstance(type_argument, ExpandedType):
+                continue
+            if type_argument in PREDEFINED_INSTANCE_SETS.keys():
+                continue
+            raise TypeError(
+                f"Unaccepted type argument passed to ExpandedType "
+                f"type_arguments: {type_argument}"
+            )
 
     def get_instances(self) -> tuple[T_co, ...]:
         """Gets instances of the class based on defined argument sets.
@@ -96,18 +125,13 @@ class ExpandedType(Generic[T_co]):
         if self.base_type in PREDEFINED_INSTANCE_SETS.keys():
             return tuple(PREDEFINED_INSTANCE_SETS[self.base_type])
 
-        if self.base_type in [Literal, _LiteralSpecialForm]:
-            instances: list[T_co] = []
+        if self.base_type is Literal:
+            instances: set[T_co] = set()
             for arg in self.type_arguments:
                 if isinstance(arg, ExpandedType):
-                    instances.extend(arg.get_instances())
-                elif arg in PREDEFINED_INSTANCE_SETS.keys():
-                    instances.extend(PREDEFINED_INSTANCE_SETS[arg])
+                    instances.update(arg.get_instances())
                 else:
-                    raise TypeError(
-                        f"Failed to find acceptable type for Literal "
-                        f"type arg: {arg}"
-                    )
+                    instances.add(arg)
             return tuple(instances)
 
         # (int, str) => [(1, 2), ("a", "b")]
