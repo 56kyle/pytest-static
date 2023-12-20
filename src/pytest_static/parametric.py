@@ -1,17 +1,16 @@
 """A Python module used for parameterizing Literal's and common types."""
 from __future__ import annotations
 
-import inspect
 import itertools
 import types
 import typing
-from dataclasses import dataclass
 from enum import Enum
+from functools import partial
 from typing import Any
 from typing import Callable
 from typing import Dict
 from typing import FrozenSet
-from typing import Generic
+from typing import Generator
 from typing import Iterable
 from typing import List
 from typing import Optional
@@ -20,18 +19,14 @@ from typing import Set
 from typing import Tuple
 from typing import TypeVar
 from typing import Union
-from typing import _SpecialForm
-from typing import cast
 from typing import get_args
 from typing import get_origin
-from typing import overload
 
 from _pytest.mark import Mark
 from _pytest.python import Metafunc
 from typing_extensions import Literal
 from typing_extensions import ParamSpec
 
-from pytest_static.exceptions import ExpandedTypeNotCallableError
 from pytest_static.type_sets import PREDEFINED_INSTANCE_SETS
 
 
@@ -71,152 +66,7 @@ PRODUCT_TYPES_SET: set[Any] = {
     tuple,
 }
 
-
-@dataclass(frozen=True)
-class ExpandedType(Generic[T_co]):
-    """A dataclass representing a type with expanded type arguments.
-
-    The type_arguments passed in must be fully expanded to begin with.
-    """
-
-    base_type: T_co
-    type_arguments: tuple[Any, ...]
-
-    def __post_init__(self) -> None:
-        """Validates the type was expanded already."""
-        if self.base_type is Literal:
-            self._validate_literal_type_arguments()
-        else:
-            self._validate_normal_type_arguments()
-
-    @staticmethod
-    def _get_combinations(
-        argument_sets: list[tuple[Any, ...]]
-    ) -> list[tuple[Any, ...]]:
-        if len(argument_sets) > 1:
-            return list(itertools.product(*argument_sets))
-        return list(zip(*argument_sets))
-
-    def _validate_literal_type_arguments(self) -> None:
-        for type_argument in self.type_arguments:
-            if isinstance(type_argument, ExpandedType):
-                continue
-            if type(type_argument) in PREDEFINED_INSTANCE_SETS.keys():
-                continue
-            raise TypeError(f"Invalid type_arg for use with Literal: {type_argument}")
-
-    def _validate_normal_type_arguments(self) -> None:
-        for type_argument in self.type_arguments:
-            if isinstance(type_argument, ExpandedType):
-                continue
-            if type_argument in PREDEFINED_INSTANCE_SETS.keys():
-                continue
-            raise TypeError(
-                f"Unaccepted type argument passed to ExpandedType "
-                f"type_arguments: {type_argument}"
-            )
-
-    def get_instances(self) -> tuple[T_co, ...]:
-        """Gets instances of the class based on defined argument sets.
-
-        Returns:
-            instances: A tuple containing the instances of the class.
-        """
-        if self.base_type in PREDEFINED_INSTANCE_SETS.keys():
-            return tuple(PREDEFINED_INSTANCE_SETS[self.base_type])
-
-        if self.base_type is Literal:
-            instances: set[T_co] = set()
-            for arg in self.type_arguments:
-                if isinstance(arg, ExpandedType):
-                    instances.update(arg.get_instances())
-                else:
-                    instances.add(arg)
-            return tuple(instances)
-
-        # (int, str) => [(1, 2), ("a", "b")]
-        argument_sets: list[tuple[T_co, ...]] = self._get_instances_for_each_argument()
-
-        # [(1, 2), ("a", "b")] => [(1, "a"), (1, "b"), (2, "a"), (2, "b")]
-        combinations: list[tuple[Any, ...]] = self._get_combinations(argument_sets)
-
-        base_type_instances: tuple[T_co, ...] = self._instantiate_combinations(
-            combinations
-        )
-        return base_type_instances
-
-    def _casted_base_type_as_callable(self) -> Callable[..., T_co]:
-        self._ensure_base_type_callable()
-        return cast(Callable[..., T_co], self.base_type)
-
-    def _ensure_base_type_callable(self) -> None:
-        if not callable(self.base_type):
-            raise ExpandedTypeNotCallableError(self.base_type)
-
-    def _get_instances_for_each_argument(self) -> list[tuple[T_co, ...]]:
-        argument_instances: list[tuple[T_co, ...]] = []
-        for argument in self.type_arguments:
-            if isinstance(argument, ExpandedType):
-                argument_instances.append(argument.get_instances())
-            else:
-                argument_instances.append(
-                    tuple(PREDEFINED_INSTANCE_SETS.get(argument, argument))
-                )
-        return argument_instances
-
-    def _instantiate_combinations(
-        self, argument_combinations: list[tuple[Any, ...]]
-    ) -> tuple[T_co, ...]:
-        try:
-            return self._instantiate_from_signature(argument_combinations)
-        except ValueError as e:
-            if "no signature found for builtin type" not in str(e):
-                raise e
-            return self._instantiate_error_handler(argument_combinations)
-
-    def _instantiate_from_signature(
-        self, argument_combinations: list[tuple[Any, ...]]
-    ) -> tuple[T_co, ...]:
-        creation_method: Callable[..., T_co] = self._casted_base_type_as_callable()
-        signature: inspect.Signature = inspect.signature(creation_method)
-        if len(signature.parameters) > 1:
-            return self._handle_multiple_signature(argument_combinations)
-        return self._handle_single_signature(argument_combinations)
-
-    def _instantiate_error_handler(
-        self, argument_combinations: list[tuple[Any, ...]]
-    ) -> tuple[T_co, ...]:
-        try:
-            return self._handle_multiple_signature(argument_combinations)
-        except TypeError:
-            return self._handle_single_signature(argument_combinations)
-
-    def _handle_multiple_signature(
-        self, argument_combinations: list[tuple[Any, ...]]
-    ) -> tuple[T_co, ...]:
-        return tuple(
-            self._instantiate_complex_type(arguments)
-            for arguments in argument_combinations
-        )
-
-    def _handle_single_signature(
-        self, argument_combinations: list[tuple[Any, ...]]
-    ) -> tuple[T_co, ...]:
-        return tuple(
-            self._instantiate_basic_type(arguments)
-            for arguments in argument_combinations
-        )
-
-    def _instantiate_complex_type(self, arguments: tuple[Any, ...]) -> T_co:
-        """Returns an instance of the base_type using the combination provided."""
-        creation_method: Callable[..., T_co] = self._casted_base_type_as_callable()
-        if self.base_type is dict:
-            return creation_method([arguments])
-        return creation_method(*arguments)
-
-    def _instantiate_basic_type(self, arguments: tuple[Any, ...]) -> T_co:
-        creation_method: Callable[..., T_co] = self._casted_base_type_as_callable()
-        return creation_method(arguments)
+UNION_TYPES: set[Any] = {Union, _UnionGenericAlias, types.UnionType}
 
 
 def parametrize_types(
@@ -269,6 +119,12 @@ def parametrize_types(
     )
 
 
+def _ensure_sequence(value: str | Sequence[str]) -> Sequence[str]:
+    if isinstance(value, str):
+        return value.split(", ")
+    return value
+
+
 def get_all_possible_type_instances(type_argument: type[T]) -> tuple[T, ...]:
     """Gets all possible instances for the given type.
 
@@ -278,169 +134,133 @@ def get_all_possible_type_instances(type_argument: type[T]) -> tuple[T, ...]:
     Returns:
         A tuple containing all possible instances of the specified type.
     """
-    expanded_types: set[type[T] | ExpandedType[T]] = expand_type(type_argument)
-    instances: list[T] = []
-    for expanded_type in expanded_types:
-        if isinstance(expanded_type, ExpandedType):
-            instances.extend(expanded_type.get_instances())
-        elif expanded_type in PREDEFINED_INSTANCE_SETS.keys():
-            instances.extend(PREDEFINED_INSTANCE_SETS[expanded_type])
-        else:
-            raise TypeError(
-                f"Failed to find matching instance for type {expanded_type}."
-            )
-    return tuple(instances)
+    return tuple(iter_instances(type_argument))
 
 
-def _ensure_sequence(value: str | Sequence[str]) -> Sequence[str]:
-    if isinstance(value, str):
-        return value.split(", ")
-    return value
-
-
-@overload
-def expand_type(type_argument: type[_LiteralSpecialForm]) -> set[Any]:
-    ...
-
-
-@overload
-def expand_type(
-    type_argument: type[_UnionGenericAlias]
-    | _UnionGenericAlias
-    | type[types.UnionType]
-    | types.UnionType,
-) -> set[Any]:
-    ...
-
-
-@overload
-def expand_type(type_argument: Enum) -> set[ExpandedType[Enum]]:
-    ...
-
-
-@overload
-def expand_type(type_argument: type[T]) -> set[ExpandedType[type[T]] | type[T]]:
-    ...
-
-
-def expand_type(type_argument: Any) -> set[Any]:
-    """Expands the provided type into a set of ExpandedType instances.
+def iter_instances(typ: Any) -> Generator[Any, None, None]:
+    """Iterates over all possible instances of the given type.
 
     Args:
-        type_argument: The type to expand.
+        typ: Any
 
     Returns:
-        A set of expanded types.
+        Generator[Any, None, None]
     """
-    original_type: Any = get_origin(type_argument)
-    base_type: Any = original_type if original_type is not None else type_argument
-
-    if base_type in TYPE_HANDLERS:
-        return TYPE_HANDLERS[base_type](type_argument)
-
-    return {ExpandedType(base_type=type_argument, type_arguments=tuple())}
-
-
-def expand_literal_type(
-    type_argument: type[_LiteralSpecialForm],
-) -> set[ExpandedType[Any]]:
-    """Expands the provided Literal type.
-
-    Args:
-        type_argument: The literal type to expand.
-
-    Returns:
-        A set of expanded types.
-    """
-    return {
-        ExpandedType(
-            base_type=get_origin(type_argument), type_arguments=get_args(type_argument)
-        )
-    }
+    origin: Any = get_origin(typ)
+    type_args: tuple[Any, ...] = get_args(typ)
+    base_type: Any = origin if origin is not None else typ
+    if base_type in PREDEFINED_INSTANCE_SETS.keys():
+        yield from PREDEFINED_INSTANCE_SETS[base_type]
+    elif base_type in SPECIAL_TYPES_SET:
+        yield from _iter_special_instances(base_type, type_args)
+    elif base_type in SUM_TYPES_SET:
+        yield from _iter_sum_instances(type_args)
+    elif base_type in PRODUCT_TYPES_SET:
+        yield from _iter_product_instances(base_type, type_args)
 
 
-def expand_basic_type(
-    type_argument: type[T],
-) -> set[type[T]]:
-    """Expands a basic type by just returning said type in a set.
-
-    Args:
-        type_argument: The basic type that needs to be expanded.
-
-    Returns:
-        A set containing just the basic type that was given.
-    """
-    return {type_argument}
+def _iter_special_instances(
+    base_type: Any, type_args: tuple[Any, ...]
+) -> Generator[Any, None, None]:
+    if base_type is Literal:
+        yield from type_args
+    if base_type is Ellipsis:
+        pass
 
 
-@overload
-def expand_sum_type(type_argument: type[_SpecialForm]) -> set[ExpandedType[Any]]:
-    ...
+def _iter_sum_instances(type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    for arg in type_args:
+        yield from iter_instances(arg)
 
 
-@overload
-def expand_sum_type(type_argument: Enum) -> set[ExpandedType[Enum]]:
-    ...
+def _iter_product_instances(
+    base_type: Any, type_args: tuple[Any, ...]
+) -> Generator[Any, None, None]:
+    if base_type in PRODUCT_TYPE_HANDLERS:
+        yield from PRODUCT_TYPE_HANDLERS[base_type](type_args)
+        return
+
+    raise TypeError(f"Unknown base type {base_type}")
 
 
-def expand_sum_type(type_argument: Any) -> set[Any]:
-    """Expands a sum type by expanding each argument of the type.
-
-    Args:
-        type_argument: The sum type to be expanded.
-
-    Returns:
-        A set of expanded types.
-    """
-    return {
-        *itertools.chain.from_iterable(
-            expand_type(argument) for argument in get_args(type_argument)
-        )
-    }
-
-
-@overload
-def expand_product_type(type_argument: type[T]) -> set[ExpandedType[T]]:
-    ...
-
-
-@overload
-def expand_product_type(type_argument: object) -> set[ExpandedType[Any]]:
-    ...
-
-
-def expand_product_type(type_argument: Any) -> set[ExpandedType[Any]]:
-    """Expands a product type into a set of ExpandedType instances.
-
-    This function expands a given type (Type[T]) that is assumed to be a product
-    type - a type defined as a combination of other types. Examples of product
-    types include Tuple or custom data classes.
-
-    The function generates a set of 'ExpandedType' objects for the input
-    type_argument. The set is derived by all possible combinations (Cartesian
-    product) of expanded subtypes.
-
-    Args:
-        type_argument: The product type to expand.
-
-    Returns:
-        A set of ExpandedType objects that represents all possible instances of
-        the original type.
-    """
-    original_type: Any = get_origin(type_argument) or type_argument
-    subtypes: tuple[Any, ...] = get_args(type_argument)
-    expanded_subtypes: list[set[Any]] = [expand_type(argument) for argument in subtypes]
-    product_sets: tuple[Iterable[Any], ...] = tuple(
-        itertools.product(*expanded_subtypes)
+def _iter_product_instances_with_constructor(
+    type_args: tuple[Any, ...],
+    /,
+    type_constructor: Callable[[tuple[Any, ...]], T_co],
+) -> Generator[T_co, None, None]:
+    combinations: Iterable[Iterable[Any]] = itertools.product(
+        *(iter_instances(arg) for arg in type_args)
     )
-    return {
-        ExpandedType(original_type, tuple(product_set)) for product_set in product_sets
-    }
+    yield from map(type_constructor, map(tuple, combinations))
 
 
-TYPE_HANDLERS: dict[Any, Callable[..., set[Any]]] = {
-    Literal: expand_literal_type,
-    **{basic_type: expand_basic_type for basic_type in PREDEFINED_INSTANCE_SETS},
-    **{sum_type: expand_sum_type for sum_type in SUM_TYPES_SET},
-    **{product_type: expand_product_type for product_type in PRODUCT_TYPES_SET},
+def _validate_combination_length(
+    combination: tuple[Any, ...], expected_length: int, typ: type[Any]
+) -> None:
+    if len(combination) != expected_length:
+        raise TypeError(
+            f"Expected combination of length {expected_length} for "
+            f"type {typ}. Got {len(combination)}"
+        )
+
+
+def _dict_constructor(combination: tuple[KT, VT]) -> dict[KT, VT]:
+    _validate_combination_length(combination=combination, expected_length=2, typ=dict)
+    return {combination[0]: combination[1]}
+
+
+def _list_constructor(combination: tuple[T]) -> list[T]:
+    _validate_combination_length(combination=combination, expected_length=1, typ=list)
+    return list(combination)
+
+
+def _set_constructor(combination: tuple[T]) -> set[T]:
+    _validate_combination_length(combination=combination, expected_length=1, typ=set)
+    return set(combination)
+
+
+def _frozenset_constructor(combination: tuple[T]) -> frozenset[T]:
+    _validate_combination_length(
+        combination=combination, expected_length=1, typ=frozenset
+    )
+    return frozenset(combination)
+
+
+def _tuple_constructor(combination: T) -> T:
+    return combination
+
+
+_iter_dict_instances: partial[Generator[Any, None, None]] = partial(
+    _iter_product_instances_with_constructor, type_constructor=_dict_constructor
+)
+
+
+_iter_list_instances: partial[Generator[Any, None, None]] = partial(
+    _iter_product_instances_with_constructor, type_constructor=_list_constructor
+)
+
+
+_iter_set_instances: partial[Generator[Any, None, None]] = partial(
+    _iter_product_instances_with_constructor, type_constructor=_set_constructor
+)
+
+
+_iter_frozenset_instances: partial[Generator[Any, None, None]] = partial(
+    _iter_product_instances_with_constructor, type_constructor=_frozenset_constructor
+)
+
+
+_iter_tuple_instances: partial[Generator[Any, None, None]] = partial(
+    _iter_product_instances_with_constructor, type_constructor=_tuple_constructor
+)
+
+
+PRODUCT_TYPE_HANDLERS: dict[
+    type[Any], partial[Generator[tuple[Any, ...], None, None]]
+] = {
+    dict: _iter_dict_instances,
+    list: _iter_list_instances,
+    set: _iter_set_instances,
+    frozenset: _iter_frozenset_instances,
+    tuple: _iter_tuple_instances,
 }
