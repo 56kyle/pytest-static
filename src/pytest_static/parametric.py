@@ -149,14 +149,16 @@ def iter_instances(typ: Any) -> Generator[Any, None, None]:
     origin: Any = get_origin(typ)
     type_args: tuple[Any, ...] = get_args(typ)
     base_type: Any = origin if origin is not None else typ
-    if base_type in PREDEFINED_INSTANCE_SETS.keys():
-        yield from PREDEFINED_INSTANCE_SETS[base_type]
-    elif base_type in SPECIAL_TYPES_SET:
+    if base_type in SPECIAL_TYPES_SET:
         yield from _iter_special_instances(base_type, type_args)
+    elif base_type in PREDEFINED_INSTANCE_SETS.keys():
+        yield from PREDEFINED_INSTANCE_SETS[base_type]
     elif base_type in SUM_TYPES_SET:
         yield from _iter_sum_instances(type_args)
     elif base_type in PRODUCT_TYPES_SET:
         yield from _iter_product_instances(base_type, type_args)
+    else:
+        yield from _iter_custom_instances(base_type, type_args)
 
 
 def _iter_special_instances(
@@ -170,12 +172,14 @@ def _iter_special_instances(
 
 def _iter_sum_instances(type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
     for arg in type_args:
-        yield from iter_instances(arg)
+        yield from get_all_possible_type_instances(arg)
 
 
 def _iter_product_instances(
     base_type: Any, type_args: tuple[Any, ...]
 ) -> Generator[Any, None, None]:
+    if Ellipsis in type_args:
+        type_args = type_args[:-1]
     if base_type in PRODUCT_TYPE_HANDLERS:
         yield from PRODUCT_TYPE_HANDLERS[base_type](type_args)
         return
@@ -202,6 +206,17 @@ def _validate_combination_length(
             f"Expected combination of length {expected_length} for "
             f"type {typ}. Got {len(combination)}"
         )
+
+
+def _iter_custom_instances(
+    base_type: Any, type_args: tuple[Any, ...]
+) -> Generator[Any, None, None]:
+    if callable(base_type):
+        yield from _iter_product_instances_with_constructor(
+            type_args, type_constructor=base_type
+        )
+    else:
+        raise TypeError(f"Type of {base_type} is not callable.")
 
 
 def _dict_constructor(combination: tuple[KT, VT]) -> dict[KT, VT]:
