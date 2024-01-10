@@ -1,4 +1,3 @@
-import inspect
 from pathlib import Path
 from typing import Iterable
 from typing import List
@@ -15,7 +14,6 @@ from pytest_static.type_sets import ComplexParams
 from pytest_static.type_sets import FloatParams
 from pytest_static.type_sets import IntParams
 from pytest_static.type_sets import StrParams
-from tests import util
 from tests.util import BASIC_TYPE_EXPECTED_EXAMPLES
 from tests.util import PRODUCT_TYPE_EXPECTED_EXAMPLES
 from tests.util import SPECIAL_TYPE_EXPECTED_EXAMPLES
@@ -31,11 +29,6 @@ def conftest(pytester: Pytester) -> Path:
         pytest_plugins = ["pytest_static.plugin"]
         """
     )
-
-
-@pytest.fixture
-def util_file_source_code(pytester: Pytester) -> str:
-    return inspect.getsource(util)
 
 
 @pytest.fixture

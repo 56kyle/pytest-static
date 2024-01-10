@@ -127,9 +127,6 @@ def type_annotation_to_string(annotation: Any) -> str:
     elif isinstance(annotation, type):
         return f"{annotation.__name__}[{args_str}]" if args else annotation.__name__
     elif origin is not None:
-        origin_name: str = origin.__name__
-        if origin_name == "Optional":
-            origin_name = "Union"
-        return f"{origin_name}[{args_str}]" if args else origin_name
+        return f"{origin.__name__}[{args_str}]" if args else origin.__name__
     else:
         return str(annotation)

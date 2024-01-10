@@ -100,5 +100,4 @@ def test_iter_instances_with_custom_type() -> None:
         y: str
 
     with pytest.raises(NotImplementedError):
-        x: list[Any] = [*iter_instances(CustomType)]
-        assert x
+        _: list[Any] = [*iter_instances(CustomType)]
