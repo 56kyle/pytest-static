@@ -283,7 +283,7 @@ PREDEFINED_TYPE_SET_HANDLERS: dict[
 
 
 TYPE_HANDLERS: dict[
-    type[Any],
+    Any,
     Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]]
     | partial[Generator[Any, None, None]],
 ] = {

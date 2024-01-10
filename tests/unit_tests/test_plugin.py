@@ -16,10 +16,10 @@ from pytest_static.type_sets import FloatParams
 from pytest_static.type_sets import IntParams
 from pytest_static.type_sets import StrParams
 from tests import util
-from tests.unit_tests.test_parametric import BASIC_TYPE_EXPECTED_EXAMPLES
-from tests.unit_tests.test_parametric import PRODUCT_TYPE_EXPECTED_EXAMPLES
-from tests.unit_tests.test_parametric import SUM_TYPE_EXPECTED_EXAMPLES
+from tests.util import BASIC_TYPE_EXPECTED_EXAMPLES
+from tests.util import PRODUCT_TYPE_EXPECTED_EXAMPLES
 from tests.util import SPECIAL_TYPE_EXPECTED_EXAMPLES
+from tests.util import SUM_TYPE_EXPECTED_EXAMPLES
 from tests.util import type_annotation_to_string
 
 

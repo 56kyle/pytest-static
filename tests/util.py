@@ -9,6 +9,7 @@ from typing import Set
 from typing import Tuple
 from typing import Union
 from typing import get_args
+from typing import get_origin
 
 from pytest_static.type_sets import PREDEFINED_INSTANCE_SETS
 
@@ -117,16 +118,16 @@ def type_annotation_to_string(annotation: Any) -> str:
     Returns:
         The string representation of the type annotation.
     """
-    if annotation is None or isinstance(annotation, type(None)):
+    origin: Any = get_origin(annotation)
+    args: tuple[Any, ...] = get_args(annotation)
+    args_str: str = ", ".join(type_annotation_to_string(arg) for arg in args)
+
+    if annotation in [None, type(None)]:
         return "None"
     elif isinstance(annotation, type):
-        args: tuple[Any, ...] = get_args(annotation)
-        args_str: str = ", ".join(type_annotation_to_string(arg) for arg in args)
         return f"{annotation.__name__}[{args_str}]" if args else annotation.__name__
-    elif hasattr(annotation, "__origin__"):
-        origin_name = annotation.__origin__.__name__
-        args: tuple[Any, ...] = get_args(annotation)
-        args_str: str = ", ".join(type_annotation_to_string(arg) for arg in args)
+    elif origin is not None:
+        origin_name: str = origin.__name__
         if origin_name == "Optional":
             origin_name = "Union"
         return f"{origin_name}[{args_str}]" if args else origin_name
