@@ -1,4 +1,6 @@
 """Common utility functions and info for pytest-static tests."""
+from __future__ import annotations
+
 from typing import Any
 from typing import Dict
 from typing import FrozenSet
