@@ -79,22 +79,7 @@ def parametrize_types(
     *,
     _param_mark: Mark | None = None,
 ) -> None:
-    """Pytest marker emulating pytest parametrize but using types to specify sets.
-
-    Args:
-        metafunc: The pytest metafunc object. Used to parameterize the test
-                  function.
-        argnames: The names of the arguments to be parametrized.
-        argtypes: The types of the arguments to be parametrized.
-        indirect: Whether the arguments should be passed as indirect fixtures
-                  to the test function.
-        ids: Optional. The ids to use for each parameter combination. Generated
-             as comma-separated lists of the parameter values if not provided.
-        scope: Optional. The scope of the parameterization. Defaults to
-               "function" scope if not provided.
-        _param_mark: Optional. The pytest mark to add to the parameterized
-                     test function.
-    """
+    """Pytest marker emulating pytest parametrize but using types to specify sets."""
     argnames = _ensure_sequence(argnames)
     if len(argnames) != len(argtypes):
         raise ValueError("Parameter names and types count must match.")
@@ -126,26 +111,12 @@ def _ensure_sequence(value: str | Sequence[str]) -> Sequence[str]:
 
 
 def get_all_possible_type_instances(type_argument: type[T]) -> tuple[T, ...]:
-    """Gets all possible instances for the given type.
-
-    Args:
-        type_argument: The type argument for which to generate all possible instances.
-
-    Returns:
-        A tuple containing all possible instances of the specified type.
-    """
+    """Gets all possible instances for the given type."""
     return tuple(iter_instances(type_argument))
 
 
 def iter_instances(typ: Any) -> Generator[Any, None, None]:
-    """Iterates over all possible instances of the given type.
-
-    Args:
-        typ: Any
-
-    Returns:
-        Generator[Any, None, None]
-    """
+    """Iterates over all possible instances of the given type."""
     origin: Any = get_origin(typ)
     type_args: tuple[Any, ...] = get_args(typ)
     base_type: Any = origin if origin is not None else typ
