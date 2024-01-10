@@ -8,12 +8,12 @@ from typing import Optional
 from typing import Set
 from typing import Tuple
 from typing import Union
-from typing import _GenericAlias
 from typing import get_args
 
 from pytest_static.type_sets import PREDEFINED_INSTANCE_SETS
 
 
+# Predefined Instance Set Lengths
 BOOL_LEN: int = len(PREDEFINED_INSTANCE_SETS[bool])
 INT_LEN: int = len(PREDEFINED_INSTANCE_SETS[int])
 FLOAT_LEN: int = len(PREDEFINED_INSTANCE_SETS[float])
@@ -47,6 +47,16 @@ SUM_TYPE_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
     (Optional[int], INT_LEN + NONE_LEN),
     (Union[bool, Union[int, str]], BOOL_LEN + INT_LEN + STR_LEN),
     (Optional[Union[int, str]], INT_LEN + STR_LEN + NONE_LEN),
+]
+
+
+PRODUCT_TYPE_MISSING_GENERIC_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
+    (List, -1),
+    (list, -1),
+    (Set, -1),
+    (set, -1),
+    (FrozenSet, -1),
+    (frozenset, -1),
 ]
 
 
@@ -107,25 +117,18 @@ def type_annotation_to_string(annotation: Any) -> str:
     Returns:
         The string representation of the type annotation.
     """
-    if annotation in [None, type(None)]:
+    if annotation is None or isinstance(annotation, type(None)):
         return "None"
     elif isinstance(annotation, type):
-        # It's a built-in type
         args: tuple[Any, ...] = get_args(annotation)
-        if len(args) == 0:
-            return annotation.__name__
         args_str: str = ", ".join(type_annotation_to_string(arg) for arg in args)
-        return annotation.__name__ + f"[{args_str}]"
-    elif isinstance(annotation, _GenericAlias):
-        # It's a complex type from the typing module
+        return f"{annotation.__name__}[{args_str}]" if args else annotation.__name__
+    elif hasattr(annotation, "__origin__"):
+        origin_name = annotation.__origin__.__name__
         args: tuple[Any, ...] = get_args(annotation)
-        if len(args) == 0:
-            return annotation.__name__
         args_str: str = ", ".join(type_annotation_to_string(arg) for arg in args)
-        name: str = (
-            annotation.__name__ if annotation.__name__ != "Optional" else "Union"
-        )
-        return name + f"[{args_str}]"
+        if origin_name == "Optional":
+            origin_name = "Union"
+        return f"{origin_name}[{args_str}]" if args else origin_name
     else:
-        # Fallback for other types
         return str(annotation)

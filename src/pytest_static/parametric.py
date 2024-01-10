@@ -51,7 +51,7 @@ VT = TypeVar("VT")
 P = ParamSpec("P")
 
 # Using algebraic data typing
-SPECIAL_TYPES_SET: set[Any] = {Literal, Ellipsis}
+SPECIAL_TYPES_SET: set[Any] = {Literal, Ellipsis, Any}
 SUM_TYPES_SET: set[Any] = {Union, Optional, Enum}
 PRODUCT_TYPES_SET: set[Any] = {
     List,
@@ -149,49 +149,60 @@ def iter_instances(typ: Any) -> Generator[Any, None, None]:
     origin: Any = get_origin(typ)
     type_args: tuple[Any, ...] = get_args(typ)
     base_type: Any = origin if origin is not None else typ
-    if base_type in SPECIAL_TYPES_SET:
-        yield from _iter_special_instances(base_type, type_args)
-    elif base_type in PREDEFINED_INSTANCE_SETS.keys():
-        yield from PREDEFINED_INSTANCE_SETS[base_type]
-    elif base_type in SUM_TYPES_SET:
-        yield from _iter_sum_instances(type_args)
-    elif base_type in PRODUCT_TYPES_SET:
-        yield from _iter_product_instances(base_type, type_args)
-    else:
+
+    handler: (
+        Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]]
+        | partial[Generator[Any, None, None]]
+        | None
+    ) = TYPE_HANDLERS.get(base_type, None)
+
+    if handler is None:
         yield from _iter_custom_instances(base_type, type_args)
+    else:
+        yield from handler(base_type, type_args)
 
 
-def _iter_special_instances(
+def _iter_literal_instances(
     base_type: Any, type_args: tuple[Any, ...]
 ) -> Generator[Any, None, None]:
-    if base_type is Literal:
-        yield from type_args
-    if base_type is Ellipsis:
-        pass
+    yield from type_args
 
 
-def _iter_sum_instances(type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+def _iter_ellipsis_instances(
+    base_type: Any, type_args: tuple[Any, ...]
+) -> Generator[Any, None, None]:
+    yield from ()
+
+
+def _iter_any_instances(
+    base_type: Any, type_args: tuple[Any, ...]
+) -> Generator[Any, None, None]:
+    for typ in PREDEFINED_INSTANCE_SETS.keys():
+        yield from iter_instances(typ)
+
+
+def _iter_predefined_instances(
+    base_type: Any, type_args: tuple[Any, ...]
+) -> Generator[Any, None, None]:
+    yield from PREDEFINED_INSTANCE_SETS[base_type]
+
+
+def _iter_sum_instances(
+    _: Any, type_args: tuple[Any, ...]
+) -> Generator[Any, None, None]:
     for arg in type_args:
         yield from get_all_possible_type_instances(arg)
 
 
-def _iter_product_instances(
-    base_type: Any, type_args: tuple[Any, ...]
-) -> Generator[Any, None, None]:
-    if Ellipsis in type_args:
-        type_args = type_args[:-1]
-    if base_type in PRODUCT_TYPE_HANDLERS:
-        yield from PRODUCT_TYPE_HANDLERS[base_type](type_args)
-        return
-
-    raise TypeError(f"Unknown base type {base_type}")
-
-
 def _iter_product_instances_with_constructor(
+    _: Any,
     type_args: tuple[Any, ...],
     /,
     type_constructor: Callable[[tuple[Any, ...]], T_co],
 ) -> Generator[T_co, None, None]:
+    if Ellipsis in type_args:
+        type_args = type_args[:-1]
+
     combinations: Iterable[Iterable[Any]] = itertools.product(
         *(iter_instances(arg) for arg in type_args)
     )
@@ -211,12 +222,8 @@ def _validate_combination_length(
 def _iter_custom_instances(
     base_type: Any, type_args: tuple[Any, ...]
 ) -> Generator[Any, None, None]:
-    if callable(base_type):
-        yield from _iter_product_instances_with_constructor(
-            type_args, type_constructor=base_type
-        )
-    else:
-        raise TypeError(f"Type of {base_type} is not callable.")
+    """Planned for future, but not yet implemented."""
+    raise NotImplementedError
 
 
 def _dict_constructor(combination: tuple[KT, VT]) -> dict[KT, VT]:
@@ -270,9 +277,23 @@ _iter_tuple_instances: partial[Generator[Any, None, None]] = partial(
 )
 
 
-PRODUCT_TYPE_HANDLERS: dict[
-    type[Any], partial[Generator[tuple[Any, ...], None, None]]
+PREDEFINED_TYPE_SET_HANDLERS: dict[
+    type[Any], Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]]
+] = {typ: _iter_predefined_instances for typ in PREDEFINED_INSTANCE_SETS.keys()}
+
+
+TYPE_HANDLERS: dict[
+    type[Any],
+    Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]]
+    | partial[Generator[Any, None, None]],
 ] = {
+    **PREDEFINED_TYPE_SET_HANDLERS,
+    Literal: _iter_literal_instances,
+    Ellipsis: _iter_ellipsis_instances,
+    Any: _iter_any_instances,
+    Union: _iter_sum_instances,
+    Optional: _iter_sum_instances,
+    Enum: _iter_sum_instances,
     dict: _iter_dict_instances,
     list: _iter_list_instances,
     set: _iter_set_instances,
