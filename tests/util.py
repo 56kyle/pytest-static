@@ -72,13 +72,13 @@ PRODUCT_TYPE_SINGLE_GENERIC_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
 
 
 if sys.version_info >= (3, 9):
-    PRODUCT_TYPE_MISSING_GENERIC_EXPECTED_EXAMPLES_POST_39: list[tuple[Any, int]] = [
+    PRODUCT_TYPE_SINGLE_GENERIC_EXPECTED_EXAMPLES_POST_39: list[tuple[Any, int]] = [
         (list[int], INT_LEN),  # type: ignore[misc]
         (set[int], INT_LEN),  # type: ignore[misc]
         (frozenset[int], INT_LEN),  # type: ignore[misc]
     ]
-    PRODUCT_TYPE_MISSING_GENERIC_EXPECTED_EXAMPLES.extend(
-        PRODUCT_TYPE_MISSING_GENERIC_EXPECTED_EXAMPLES_POST_39
+    PRODUCT_TYPE_SINGLE_GENERIC_EXPECTED_EXAMPLES.extend(
+        PRODUCT_TYPE_SINGLE_GENERIC_EXPECTED_EXAMPLES_POST_39
     )
 
 
