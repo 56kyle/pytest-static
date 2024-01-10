@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import itertools
+import sys
 import types
 import typing
 from enum import Enum
@@ -66,7 +67,11 @@ PRODUCT_TYPES_SET: set[Any] = {
     tuple,
 }
 
-UNION_TYPES: set[Any] = {Union, _UnionGenericAlias, types.UnionType}
+
+if sys.version_info >= (3, 10):
+    UNION_TYPES: set[Any] = {Union, _UnionGenericAlias, types.UnionType}
+else:
+    UNION_TYPES: set[Any] = {Union, _UnionGenericAlias}
 
 
 def parametrize_types(

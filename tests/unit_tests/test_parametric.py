@@ -4,11 +4,11 @@ from dataclasses import dataclass
 from typing import Any
 from typing import Generator
 from typing import Iterable
-from typing import ParamSpec
 from typing import TypeVar
 
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
+from typing_extensions import ParamSpec
 
 import pytest_static
 from pytest_static.parametric import get_all_possible_type_instances
