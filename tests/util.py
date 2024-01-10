@@ -1,6 +1,7 @@
 """Common utility functions and info for pytest-static tests."""
 from __future__ import annotations
 
+import sys
 from typing import Any
 from typing import Dict
 from typing import FrozenSet
@@ -65,42 +66,73 @@ PRODUCT_TYPE_MISSING_GENERIC_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
 
 PRODUCT_TYPE_SINGLE_GENERIC_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
     (List[int], INT_LEN),
-    (list[int], INT_LEN),  # type: ignore[misc]
     (Set[int], INT_LEN),
-    (set[int], INT_LEN),  # type: ignore[misc]
     (FrozenSet[int], INT_LEN),
-    (frozenset[int], INT_LEN),  # type: ignore[misc]
 ]
+
+
+if sys.version_info >= (3, 9):
+    PRODUCT_TYPE_MISSING_GENERIC_EXPECTED_EXAMPLES_POST_39: list[tuple[Any, int]] = [
+        (list[int], INT_LEN),  # type: ignore[misc]
+        (set[int], INT_LEN),  # type: ignore[misc]
+        (frozenset[int], INT_LEN),  # type: ignore[misc]
+    ]
+    PRODUCT_TYPE_MISSING_GENERIC_EXPECTED_EXAMPLES.extend(
+        PRODUCT_TYPE_MISSING_GENERIC_EXPECTED_EXAMPLES_POST_39
+    )
 
 
 PRODUCT_TYPE_DOUBLE_GENERIC_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
     (Dict[bool, int], BOOL_LEN * INT_LEN),
-    (dict[bool, int], BOOL_LEN * INT_LEN),  # type: ignore[misc]
     (Dict[bool, Union[int, str]], BOOL_LEN * (INT_LEN + STR_LEN)),
-    (dict[bool, Union[int, str]], BOOL_LEN * (INT_LEN + STR_LEN)),  # type: ignore[misc]
 ]
 
 
+if sys.version_info >= (3, 9):
+    PRODUCT_TYPE_DOUBLE_GENERIC_EXPECTED_EXAMPLES_POST_39: list[tuple[Any, int]] = [
+        (dict[bool, int], BOOL_LEN * INT_LEN),  # type: ignore[misc]
+        (dict[bool, Union[int, str]], BOOL_LEN * (INT_LEN + STR_LEN)),  # type: ignore[misc]
+    ]
+    PRODUCT_TYPE_DOUBLE_GENERIC_EXPECTED_EXAMPLES.extend(
+        PRODUCT_TYPE_DOUBLE_GENERIC_EXPECTED_EXAMPLES_POST_39
+    )
+
 PRODUCT_TYPE_SEVERAL_GENERIC_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
     (Tuple[bool, int, str], BOOL_LEN * INT_LEN * STR_LEN),
-    (tuple[bool, int, str], BOOL_LEN * INT_LEN * STR_LEN),  # type: ignore[misc]
     (
         Tuple[Union[bool, int], int, Union[bool, str]],
         (BOOL_LEN + INT_LEN) * INT_LEN * (BOOL_LEN + STR_LEN),
     ),
-    (
-        tuple[Union[bool, int], int, Union[bool, str]],  # type: ignore[misc]
-        (BOOL_LEN + INT_LEN) * INT_LEN * (BOOL_LEN + STR_LEN),
-    ),
 ]
+
+
+if sys.version_info >= (3, 9):
+    PRODUCT_TYPE_SEVERAL_GENERIC_EXPECTED_EXAMPLES_POST_39: list[tuple[Any, int]] = [
+        (tuple[bool, int, str], BOOL_LEN * INT_LEN * STR_LEN),  # type: ignore[misc]
+        (
+            tuple[Union[bool, int], int, Union[bool, str]],  # type: ignore[misc]
+            (BOOL_LEN + INT_LEN) * INT_LEN * (BOOL_LEN + STR_LEN),
+        ),
+    ]
+    PRODUCT_TYPE_SEVERAL_GENERIC_EXPECTED_EXAMPLES.extend(
+        PRODUCT_TYPE_SEVERAL_GENERIC_EXPECTED_EXAMPLES_POST_39
+    )
 
 
 PRODUCT_TYPE_PARAM_SPEC_GENERIC_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
     (Tuple[int, ...], INT_LEN),
-    (tuple[int, ...], INT_LEN),  # type: ignore[misc]
     (Tuple[Union[int, str], ...], INT_LEN + STR_LEN),
-    (tuple[Union[int, str], ...], INT_LEN + STR_LEN),  # type: ignore[misc]
 ]
+
+
+if sys.version_info >= (3, 9):
+    PRODUCT_TYPE_PARAM_SPEC_GENERIC_EXPECTED_EXAMPLES_POST_39: list[tuple[Any, int]] = [
+        (tuple[int, ...], INT_LEN),  # type: ignore[misc]
+        (tuple[Union[int, str], ...], INT_LEN + STR_LEN),  # type: ignore[misc]
+    ]
+    PRODUCT_TYPE_PARAM_SPEC_GENERIC_EXPECTED_EXAMPLES.extend(
+        PRODUCT_TYPE_PARAM_SPEC_GENERIC_EXPECTED_EXAMPLES_POST_39
+    )
 
 
 PRODUCT_TYPE_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
@@ -131,6 +163,7 @@ def type_annotation_to_string(annotation: Any) -> str:
             f"{annotation.__name__}[{args_str}]" if args else str(annotation.__name__)
         )
     elif origin is not None:
-        return f"{origin.__name__}[{args_str}]" if args else str(origin.__name__)
+        origin_name: str = getattr(origin, "__name__", str(origin))
+        return f"{origin_name}[{args_str}]" if args else origin_name
     else:
         return str(annotation)
