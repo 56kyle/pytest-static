@@ -73,9 +73,9 @@ PRODUCT_TYPE_SINGLE_GENERIC_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
 
 if sys.version_info >= (3, 9):
     PRODUCT_TYPE_SINGLE_GENERIC_EXPECTED_EXAMPLES_POST_39: list[tuple[Any, int]] = [
-        (list[int], INT_LEN),  # type: ignore[misc]
-        (set[int], INT_LEN),  # type: ignore[misc]
-        (frozenset[int], INT_LEN),  # type: ignore[misc]
+        (list[int], INT_LEN),
+        (set[int], INT_LEN),
+        (frozenset[int], INT_LEN),
     ]
     PRODUCT_TYPE_SINGLE_GENERIC_EXPECTED_EXAMPLES.extend(
         PRODUCT_TYPE_SINGLE_GENERIC_EXPECTED_EXAMPLES_POST_39
@@ -90,8 +90,8 @@ PRODUCT_TYPE_DOUBLE_GENERIC_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
 
 if sys.version_info >= (3, 9):
     PRODUCT_TYPE_DOUBLE_GENERIC_EXPECTED_EXAMPLES_POST_39: list[tuple[Any, int]] = [
-        (dict[bool, int], BOOL_LEN * INT_LEN),  # type: ignore[misc]
-        (dict[bool, Union[int, str]], BOOL_LEN * (INT_LEN + STR_LEN)),  # type: ignore[misc]
+        (dict[bool, int], BOOL_LEN * INT_LEN),
+        (dict[bool, Union[int, str]], BOOL_LEN * (INT_LEN + STR_LEN)),
     ]
     PRODUCT_TYPE_DOUBLE_GENERIC_EXPECTED_EXAMPLES.extend(
         PRODUCT_TYPE_DOUBLE_GENERIC_EXPECTED_EXAMPLES_POST_39
@@ -108,9 +108,9 @@ PRODUCT_TYPE_SEVERAL_GENERIC_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
 
 if sys.version_info >= (3, 9):
     PRODUCT_TYPE_SEVERAL_GENERIC_EXPECTED_EXAMPLES_POST_39: list[tuple[Any, int]] = [
-        (tuple[bool, int, str], BOOL_LEN * INT_LEN * STR_LEN),  # type: ignore[misc]
+        (tuple[bool, int, str], BOOL_LEN * INT_LEN * STR_LEN),
         (
-            tuple[Union[bool, int], int, Union[bool, str]],  # type: ignore[misc]
+            tuple[Union[bool, int], int, Union[bool, str]],
             (BOOL_LEN + INT_LEN) * INT_LEN * (BOOL_LEN + STR_LEN),
         ),
     ]
@@ -127,8 +127,8 @@ PRODUCT_TYPE_PARAM_SPEC_GENERIC_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
 
 if sys.version_info >= (3, 9):
     PRODUCT_TYPE_PARAM_SPEC_GENERIC_EXPECTED_EXAMPLES_POST_39: list[tuple[Any, int]] = [
-        (tuple[int, ...], INT_LEN),  # type: ignore[misc]
-        (tuple[Union[int, str], ...], INT_LEN + STR_LEN),  # type: ignore[misc]
+        (tuple[int, ...], INT_LEN),
+        (tuple[Union[int, str], ...], INT_LEN + STR_LEN),
     ]
     PRODUCT_TYPE_PARAM_SPEC_GENERIC_EXPECTED_EXAMPLES.extend(
         PRODUCT_TYPE_PARAM_SPEC_GENERIC_EXPECTED_EXAMPLES_POST_39
