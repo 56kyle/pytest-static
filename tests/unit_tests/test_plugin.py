@@ -51,6 +51,7 @@ def parametrize_types_test(
         import pytest
         import typing
         from typing import *
+        from typing_extensions import Literal, ParamSpec, get_origin, get_args
 
         @pytest.mark.parametrize_types(
             argnames={argnames},
