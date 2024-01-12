@@ -6,13 +6,14 @@ from typing import Any
 from typing import Dict
 from typing import FrozenSet
 from typing import List
-from typing import Literal
 from typing import Optional
 from typing import Set
 from typing import Tuple
 from typing import Union
-from typing import get_args
-from typing import get_origin
+
+from typing_extensions import Literal
+from typing_extensions import get_args
+from typing_extensions import get_origin
 
 from pytest_static.type_sets import PREDEFINED_INSTANCE_SETS
 
@@ -96,6 +97,7 @@ if sys.version_info >= (3, 9):
     PRODUCT_TYPE_DOUBLE_GENERIC_EXPECTED_EXAMPLES.extend(
         PRODUCT_TYPE_DOUBLE_GENERIC_EXPECTED_EXAMPLES_POST_39
     )
+
 
 PRODUCT_TYPE_SEVERAL_GENERIC_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
     (Tuple[bool, int, str], BOOL_LEN * INT_LEN * STR_LEN),
