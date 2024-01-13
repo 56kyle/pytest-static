@@ -10,12 +10,30 @@ from typing import Optional
 from typing import Set
 from typing import Tuple
 from typing import Union
+from typing import _GenericAlias
 
 from typing_extensions import Literal
 from typing_extensions import get_args
 from typing_extensions import get_origin
 
 from pytest_static.type_sets import PREDEFINED_INSTANCE_SETS
+
+
+if sys.version_info >= (3, 9):
+    from typing import _SpecialGenericAlias
+
+    def _is_special_generic_alias(annotation: Any) -> bool:
+        if get_origin(annotation) == Dict:
+            raise Exception(
+                f"Origin is Dict, annotation={annotation},"
+                f" origin={get_origin(annotation)}"
+            )
+        return isinstance(annotation, _SpecialGenericAlias)
+
+else:
+
+    def _is_special_generic_alias(annotation: Any) -> bool:
+        return isinstance(annotation, _GenericAlias) and annotation._special
 
 
 # Predefined Instance Set Lengths
@@ -154,18 +172,46 @@ def type_annotation_to_string(annotation: Any) -> str:
     Returns:
         The string representation of the type annotation.
     """
+    return f"{_get_origin_string(annotation)}{_get_args_str(annotation)}"
+
+
+def _get_origin_string(annotation: Any) -> str:
     origin: Any = get_origin(annotation)
-    args: tuple[Any, ...] = get_args(annotation)
-    args_str: str = ", ".join(type_annotation_to_string(arg) for arg in args)
+    annotation_name: str
 
     if annotation in [None, type(None)]:
         return "None"
+    elif annotation in [..., Ellipsis]:
+        return "..."
+    elif _is_special_generic_alias(annotation):
+        annotation_name = getattr(annotation, "__name__", str(annotation))
     elif isinstance(annotation, type):
-        return (
-            f"{annotation.__name__}[{args_str}]" if args else str(annotation.__name__)
-        )
+        annotation_name = annotation.__name__
     elif origin is not None:
-        origin_name: str = getattr(origin, "__name__", str(origin))
-        return f"{origin_name}[{args_str}]" if args else origin_name
+        annotation_name_with_generics: str = str(annotation)
+        if "[" in annotation_name_with_generics:
+            annotation_name = annotation_name_with_generics.split("[")[0]
+        else:
+            annotation_name = annotation_name_with_generics
     else:
-        return str(annotation)
+        annotation_name = str(annotation)
+
+    annotation_name_without_module: str = _remove_typing_module_from_str(
+        annotation_name
+    )
+    if annotation_name_without_module == "Optional":
+        return "Union"
+    return annotation_name_without_module
+
+
+def _get_args_str(annotation: Any) -> str:
+    args: tuple[Any, ...] = get_args(annotation)
+    args_str: str = ", ".join(type_annotation_to_string(arg) for arg in args)
+
+    if len(args) == 0:
+        return ""
+    return f"[{args_str}]"
+
+
+def _remove_typing_module_from_str(annotation_str: str) -> str:
+    return annotation_str.replace("typing_extensions.", "").replace("typing.", "")

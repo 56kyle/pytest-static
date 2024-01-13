@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 from pathlib import Path
 from typing import Iterable
-from typing import List
 from typing import Sequence
 
 import pytest
@@ -40,7 +41,7 @@ def argtypes(request: FixtureRequest) -> Sequence[str]:
 def parametrize_types_test(
     pytester: Pytester, conftest: Path, argtypes: Sequence[str]
 ) -> Path:
-    argnames: List[str] = [f"arg{i}" for i in range(len(argtypes))]
+    argnames: list[str] = [f"arg{i}" for i in range(len(argtypes))]
     argtypes_formatted: str = ", ".join([f"{argtype}" for argtype in argtypes])
     signature: str = ", ".join(
         [f"{argname}" for argname, argtype in zip(argnames, argtypes)]
@@ -48,6 +49,7 @@ def parametrize_types_test(
 
     return pytester.makepyfile(
         f"""
+        from __future__ import annotations
         import pytest
         import typing
         from typing import *
