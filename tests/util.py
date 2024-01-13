@@ -23,11 +23,6 @@ if sys.version_info >= (3, 9):
     from typing import _SpecialGenericAlias
 
     def _is_special_generic_alias(annotation: Any) -> bool:
-        if get_origin(annotation) == Dict:
-            raise Exception(
-                f"Origin is Dict, annotation={annotation},"
-                f" origin={get_origin(annotation)}"
-            )
         return isinstance(annotation, _SpecialGenericAlias)
 
 else:
@@ -189,10 +184,9 @@ def _get_origin_string(annotation: Any) -> str:
         annotation_name = annotation.__name__
     elif origin is not None:
         annotation_name_with_generics: str = str(annotation)
-        if "[" in annotation_name_with_generics:
-            annotation_name = annotation_name_with_generics.split("[")[0]
-        else:
-            annotation_name = annotation_name_with_generics
+        annotation_name = annotation_name_with_generics.split("[")[
+            0
+        ]  # Should never not be a generic here
     else:
         annotation_name = str(annotation)
 
