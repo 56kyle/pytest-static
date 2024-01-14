@@ -10,7 +10,7 @@ from typing import Optional
 from typing import Set
 from typing import Tuple
 from typing import Union
-from typing import _GenericAlias
+from typing import _GenericAlias  # type: ignore[attr-defined]
 
 from typing_extensions import Literal
 from typing_extensions import get_args
@@ -20,7 +20,7 @@ from pytest_static.type_sets import PREDEFINED_INSTANCE_SETS
 
 
 if sys.version_info >= (3, 9):
-    from typing import _SpecialGenericAlias
+    from typing import _SpecialGenericAlias  # type: ignore[attr-defined]
 
     def _is_special_generic_alias(annotation: Any) -> bool:
         return isinstance(annotation, _SpecialGenericAlias)
