@@ -16,6 +16,6 @@ def pytest_configure(config: pytest.Config) -> None:
     """Adds pytest-static plugin markers to the pytest CLI."""
     config.addinivalue_line(
         "markers",
-        "parametrize_types(argnames, types, ids, *args, **kwargs):"
-        " Generate parametrized tests for the given argnames and types in argvalues.",
+        "parametrize_types(argnames, argtypes, ids, *type_args, **kwargs):"
+        " Generate parametrized tests for the given argnames and types in argtypes.",
     )

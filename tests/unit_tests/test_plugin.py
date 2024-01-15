@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Any
 from typing import Iterable
-from typing import List
 from typing import Sequence
 
 import pytest
+from _pytest.fixtures import FixtureRequest
+from _pytest.pytester import Pytester
 
 from pytest_static.plugin import pytest_configure
 from pytest_static.type_sets import BoolParams
@@ -13,10 +15,15 @@ from pytest_static.type_sets import ComplexParams
 from pytest_static.type_sets import FloatParams
 from pytest_static.type_sets import IntParams
 from pytest_static.type_sets import StrParams
+from tests.util import BASIC_TYPE_EXPECTED_EXAMPLES
+from tests.util import PRODUCT_TYPE_EXPECTED_EXAMPLES
+from tests.util import SPECIAL_TYPE_EXPECTED_EXAMPLES
+from tests.util import SUM_TYPE_EXPECTED_EXAMPLES
+from tests.util import type_annotation_to_string
 
 
 @pytest.fixture
-def conftest(pytester: pytest.Pytester) -> Path:
+def conftest(pytester: Pytester) -> Path:
     return pytester.makeconftest(
         """
         import pytest
@@ -26,15 +33,15 @@ def conftest(pytester: pytest.Pytester) -> Path:
 
 
 @pytest.fixture
-def argtypes(request: pytest.FixtureRequest) -> Sequence[Any]:
-    return getattr(request, "param", ())
+def argtypes(request: FixtureRequest) -> Sequence[str]:
+    return getattr(request, "param", [])
 
 
 @pytest.fixture
 def parametrize_types_test(
-    pytester: pytest.Pytester, conftest: Path, argtypes: Sequence[str]
+    pytester: Pytester, conftest: Path, argtypes: Sequence[str]
 ) -> Path:
-    argnames: List[str] = [f"arg{i}" for i in range(len(argtypes))]
+    argnames: list[str] = [f"arg{i}" for i in range(len(argtypes))]
     argtypes_formatted: str = ", ".join([f"{argtype}" for argtype in argtypes])
     signature: str = ", ".join(
         [f"{argname}" for argname, argtype in zip(argnames, argtypes)]
@@ -42,9 +49,11 @@ def parametrize_types_test(
 
     return pytester.makepyfile(
         f"""
+        from __future__ import annotations
         import pytest
         import typing
         from typing import *
+        from typing_extensions import Literal, ParamSpec, get_origin, get_args
 
         @pytest.mark.parametrize_types(
             argnames={argnames},
@@ -58,7 +67,7 @@ def parametrize_types_test(
 
 
 def test_parametrize_types_with_unequal_names_and_types(
-    pytester: pytest.Pytester, conftest: Path
+    pytester: Pytester, conftest: Path
 ) -> None:
     test_path: Path = pytester.makepyfile(
         """
@@ -80,7 +89,7 @@ def test_parametrize_types_with_unequal_names_and_types(
 
 
 def test_parametrize_types_with_no_ids_provided(
-    pytester: pytest.Pytester, conftest: Path
+    pytester: Pytester, conftest: Path
 ) -> None:
     test_path: Path = pytester.makepyfile(
         """
@@ -102,7 +111,7 @@ def test_parametrize_types_with_no_ids_provided(
 
 
 def test_parametrize_types_with_argnames_as_string(
-    pytester: pytest.Pytester, conftest: Path
+    pytester: Pytester, conftest: Path
 ) -> None:
     test_path: Path = pytester.makepyfile(
         """
@@ -133,11 +142,11 @@ def test_parametrize_types_with_argnames_as_string(
         (("str",), len(StrParams)),
         (("bytes",), len(BytesParams)),
     ],
-    ids=lambda x: str(x) if isinstance(x, Iterable) else "",
+    ids=lambda x: str(x) if isinstance(x, Iterable) else x,
     indirect=["argtypes"],
 )
 def test_parametrize_types_with_single_basic(
-    pytester: pytest.Pytester, parametrize_types_test: Path, expected: int
+    pytester: Pytester, parametrize_types_test: Path, expected: int
 ) -> None:
     result: pytest.RunResult = pytester.runpytest(parametrize_types_test)
     result.assert_outcomes(passed=expected)
@@ -148,11 +157,11 @@ def test_parametrize_types_with_single_basic(
     argvalues=[
         (("bool", "int"), len(BoolParams) * len(IntParams)),
     ],
-    ids=lambda x: str(x) if isinstance(x, Iterable) else "",
+    ids=lambda x: str(x) if isinstance(x, Iterable) else x,
     indirect=["argtypes"],
 )
 def test_parametrize_types_with_multiple_basic(
-    pytester: pytest.Pytester, parametrize_types_test: Path, expected: int
+    pytester: Pytester, parametrize_types_test: Path, expected: int
 ) -> None:
     result: pytest.RunResult = pytester.runpytest(parametrize_types_test)
     result.assert_outcomes(passed=expected)
@@ -167,11 +176,11 @@ def test_parametrize_types_with_multiple_basic(
         (("Dict[str, bool]",), len(StrParams) * len(BoolParams)),
         (("Tuple[int, str]",), len(IntParams) * len(StrParams)),
     ],
-    ids=lambda x: str(x) if isinstance(x, Iterable) else "",
+    ids=lambda x: str(x) if isinstance(x, Iterable) else x,
     indirect=["argtypes"],
 )
 def test_parametrize_types_with_single_expanded(
-    pytester: pytest.Pytester, parametrize_types_test: Path, expected: int
+    pytester: Pytester, parametrize_types_test: Path, expected: int
 ) -> None:
     result: pytest.RunResult = pytester.runpytest(parametrize_types_test)
     result.assert_outcomes(passed=expected)
@@ -190,17 +199,81 @@ def test_parametrize_types_with_single_expanded(
             len(IntParams) * len(StrParams) * len(BoolParams),
         ),
     ],
-    ids=lambda x: str(x) if isinstance(x, Iterable) else "",
+    ids=lambda x: str(x) if isinstance(x, Iterable) else x,
     indirect=["argtypes"],
 )
 def test_parametrize_types_with_multiple_expanded(
-    pytester: pytest.Pytester, parametrize_types_test: Path, expected: int
+    pytester: Pytester, parametrize_types_test: Path, expected: int
 ) -> None:
     result: pytest.RunResult = pytester.runpytest(parametrize_types_test)
     result.assert_outcomes(passed=expected)
 
 
-def test_pytest_configure(pytester: pytest.Pytester) -> None:
+@pytest.mark.parametrize(
+    argnames=["argtypes", "expected"],
+    argvalues=[
+        ((type_annotation_to_string(typ),), expected)
+        for typ, expected in SPECIAL_TYPE_EXPECTED_EXAMPLES
+    ],
+    ids=lambda x: str(x) if isinstance(x, Iterable) else x,
+    indirect=["argtypes"],
+)
+def test_parametrize_types_with_special_type_expected_examples(
+    pytester: Pytester, parametrize_types_test: Path, expected: int
+) -> None:
+    result: pytest.RunResult = pytester.runpytest(parametrize_types_test)
+    result.assert_outcomes(passed=expected)
+
+
+@pytest.mark.parametrize(
+    argnames=["argtypes", "expected"],
+    argvalues=[
+        ((type_annotation_to_string(typ),), expected)
+        for typ, expected in BASIC_TYPE_EXPECTED_EXAMPLES
+    ],
+    ids=lambda x: str(x) if isinstance(x, Iterable) else x,
+    indirect=["argtypes"],
+)
+def test_parametrize_types_with_basic_type_expected_examples(
+    pytester: Pytester, parametrize_types_test: Path, expected: int
+) -> None:
+    result: pytest.RunResult = pytester.runpytest(parametrize_types_test)
+    result.assert_outcomes(passed=expected)
+
+
+@pytest.mark.parametrize(
+    argnames=["argtypes", "expected"],
+    argvalues=[
+        ((type_annotation_to_string(typ),), expected)
+        for typ, expected in SUM_TYPE_EXPECTED_EXAMPLES
+    ],
+    ids=lambda x: str(x) if isinstance(x, Iterable) else x,
+    indirect=["argtypes"],
+)
+def test_parametrize_types_with_sum_type_expected_examples(
+    pytester: Pytester, parametrize_types_test: Path, expected: int
+) -> None:
+    result: pytest.RunResult = pytester.runpytest(parametrize_types_test)
+    result.assert_outcomes(passed=expected)
+
+
+@pytest.mark.parametrize(
+    argnames=["argtypes", "expected"],
+    argvalues=[
+        ((type_annotation_to_string(typ),), expected)
+        for typ, expected in PRODUCT_TYPE_EXPECTED_EXAMPLES
+    ],
+    ids=lambda x: str(x) if isinstance(x, Iterable) else x,
+    indirect=["argtypes"],
+)
+def test_parametrize_types_with_product_type_expected_examples(
+    pytester: Pytester, parametrize_types_test: Path, expected: int
+) -> None:
+    result: pytest.RunResult = pytester.runpytest(parametrize_types_test)
+    result.assert_outcomes(passed=expected)
+
+
+def test_pytest_configure(pytester: Pytester) -> None:
     config: pytest.Config = pytester.parseconfig()
     assert len(config.getini("markers")) == 0
     pytest_configure(config)
