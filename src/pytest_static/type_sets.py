@@ -217,4 +217,5 @@ PREDEFINED_INSTANCE_SETS: Dict[Any, Set[Any]] = {
     bytes: BytesParams,
     type(None): {None},
     ...: set(),
+    Ellipsis: set(),
 }

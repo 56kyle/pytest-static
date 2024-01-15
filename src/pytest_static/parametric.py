@@ -144,12 +144,6 @@ def _iter_literal_instances(
     yield from type_args
 
 
-def _iter_ellipsis_instances(
-    base_type: Any, type_args: tuple[Any, ...]
-) -> Generator[Any, None, None]:
-    yield from ()
-
-
 def _iter_any_instances(
     base_type: Any, type_args: tuple[Any, ...]
 ) -> Generator[Any, None, None]:
@@ -265,7 +259,6 @@ TYPE_HANDLERS: dict[
 ] = {
     **PREDEFINED_TYPE_SET_HANDLERS,
     Literal: _iter_literal_instances,
-    Ellipsis: _iter_ellipsis_instances,
     Any: _iter_any_instances,
     Union: _iter_sum_instances,
     Optional: _iter_sum_instances,
