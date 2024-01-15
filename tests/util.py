@@ -40,6 +40,16 @@ STR_LEN: int = len(PREDEFINED_INSTANCE_SETS[str])
 BYTES_LEN: int = len(PREDEFINED_INSTANCE_SETS[bytes])
 NONE_LEN: int = 1
 ELLIPSIS_LEN: int = 0
+ANY_LEN: int = (
+    BOOL_LEN
+    + INT_LEN
+    + FLOAT_LEN
+    + COMPLEX_LEN
+    + STR_LEN
+    + BYTES_LEN
+    + NONE_LEN
+    + ELLIPSIS_LEN
+)
 
 
 SPECIAL_TYPE_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
@@ -47,6 +57,7 @@ SPECIAL_TYPE_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
     (Literal[1, Literal[2, 3]], 3),
     (Literal[1, Literal[Literal[2, 3], Literal[4, 5]]], 5),
     (Literal[1, Literal[Literal[1, 2], Literal[2, 3], Literal[3, 4]]], 4),
+    (Any, ANY_LEN),
 ]
 
 
