@@ -2,7 +2,6 @@
 from typing import Any
 from typing import Dict
 from typing import Set
-from typing import Type
 from typing import TypeVar
 
 
@@ -209,7 +208,7 @@ BytesParams: Set[bytes] = {
 }
 
 
-PREDEFINED_TYPE_SETS: Dict[Type[Any], Set[Any]] = {
+PREDEFINED_INSTANCE_SETS: Dict[Any, Set[Any]] = {
     bool: BoolParams,
     int: IntParams,
     float: FloatParams,
@@ -217,8 +216,6 @@ PREDEFINED_TYPE_SETS: Dict[Type[Any], Set[Any]] = {
     str: StrParams,
     bytes: BytesParams,
     type(None): {None},
-    type(...): {Ellipsis},
-    type(NotImplemented): {NotImplemented},
-    type(Any): {Any},
-    type: {type},
+    ...: set(),
+    Ellipsis: set(),
 }
