@@ -89,6 +89,11 @@ jobs:
           restore-keys: |
             ${{ steps.pre-commit-cache.outputs.result }}-
 
+      - name: Ensure Distutils
+        if: always() && matrix.os == 'macos-latest'
+        run: |
+          python3 -m pip install setuptools
+
       - name: Run Nox
         run: |
           nox --python=${{ matrix.python }}
