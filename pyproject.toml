@@ -64,6 +64,10 @@ pytest-static = "pytest_static.__main__:main"
 [tool.poetry.plugins."pytest"]
 pytest-static= "pytest_static.plugin"
 
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.3.1"
+
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
 tests = ["tests", "*/tests"]

@@ -1,4 +1,5 @@
 """Custom exception classes used in pytest-static."""
+
 from typing import Any
 
 

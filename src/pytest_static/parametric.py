@@ -1,4 +1,5 @@
 """A Python module used for parameterizing Literal's and common types."""
+
 from __future__ import annotations
 
 import itertools

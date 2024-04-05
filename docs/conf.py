@@ -1,4 +1,5 @@
 """Sphinx configuration."""
+
 project = "pytest-static"
 author = "Kyle Oliver"
 copyright = "2023, Kyle Oliver"

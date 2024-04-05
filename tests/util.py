@@ -1,4 +1,5 @@
 """Common utility functions and info for pytest-static tests."""
+
 from __future__ import annotations
 
 import sys
