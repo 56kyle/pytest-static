@@ -1,6 +1,8 @@
 {
+  "_checkout": null,
   "_output_dir": "C:\\Users\\56kyl\\source\\repos",
-  "_template": "gh:cjolowicz/cookiecutter-hypermodern-python",
+  "_repo_dir": "./cookiecutter-hypermodern-python",
+  "_template": "./cookiecutter-hypermodern-python",
   "author": "Kyle Oliver",
   "copyright_year": "2023",
   "development_status": "Development Status :: 1 - Planning",
@@ -10,5 +12,5 @@
   "license": "MIT",
   "package_name": "pytest_static",
   "project_name": "pytest-static",
-  "version": "0.0.0"
+  "version": "0.3.0"
 }

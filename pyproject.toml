@@ -11,9 +11,10 @@ documentation = "https://pytest-static.readthedocs.io"
 classifiers = [
     "Development Status :: 1 - Planning",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Topic :: Software Development :: Testing",
@@ -24,21 +25,21 @@ classifiers = [
 Changelog = "https://github.com/56kyle/pytest-static/releases"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<4.0"
+python = "^3.9,<4.0"
 click = ">=8.0.1"
-loguru = "^0.7.0"
-tornado = ">=6.3.2"
+loguru = "^0.7.2"
 pytest = "^7.4.3"
+platformdirs = "^4.2.2"
 typing-extensions = "^4.9.0"
 
 
 [tool.poetry.dev-dependencies]
 Pygments = ">=2.10.0"
+bandit = ">=1.7.4"
 black = ">=21.10b0"
 coverage = {extras = ["toml"], version = ">=6.2"}
 darglint = ">=1.8.1"
 flake8 = ">=4.0.1"
-flake8-bandit = ">=2.1.2"
 flake8-bugbear = ">=21.9.2"
 flake8-docstrings = ">=1.6.0"
 flake8-rst-docstrings = ">=0.2.5"
@@ -86,7 +87,6 @@ strict = true
 warn_unreachable = true
 pretty = true
 show_column_numbers = true
-show_error_codes = true
 show_error_context = true
 
 [build-system]
