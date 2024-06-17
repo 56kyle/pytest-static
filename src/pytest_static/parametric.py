@@ -93,7 +93,7 @@ def parametrize_types(
     parameter_sets: list[list[T]] = [
         list(get_all_possible_type_instances(t)) for t in argtypes
     ]
-    parameter_combinations: list[Iterable[itertools.product[tuple[Any, ...]]]] = list(
+    parameter_combinations: list[tuple[T, ...]] = list(
         itertools.product(*parameter_sets)
     )
 
