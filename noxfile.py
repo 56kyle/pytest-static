@@ -1,4 +1,5 @@
 """Nox sessions."""
+
 import os
 import shlex
 import shutil
@@ -23,7 +24,7 @@ except ImportError:
 
 
 package = "pytest_static"
-python_versions = ["3.10", "3.9", "3.8"]
+python_versions = ["3.12", "3.11", "3.10", "3.9"]
 nox.needs_version = ">= 2021.6.6"
 nox.options.sessions = (
     "pre-commit",
@@ -46,7 +47,7 @@ def activate_virtualenv_in_precommit_hooks(session: Session) -> None:
     Args:
         session: The Session object.
     """
-    assert session.bin is not None  # noqa: S101
+    assert session.bin is not None  # nosec
 
     # Only patch hooks containing a reference to this session's bindir. Support
     # quoting rules for Python and bash, but strip the outermost quotes so we
@@ -120,10 +121,10 @@ def precommit(session: Session) -> None:
         "--show-diff-on-failure",
     ]
     session.install(
+        "bandit",
         "black",
         "darglint",
         "flake8",
-        "flake8-bandit",
         "flake8-bugbear",
         "flake8-docstrings",
         "flake8-rst-docstrings",

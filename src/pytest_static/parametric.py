@@ -1,10 +1,10 @@
 """A Python module used for parameterizing Literal's and common types."""
+
 from __future__ import annotations
 
 import itertools
 import sys
 import types
-import typing
 from enum import Enum
 from functools import partial
 from typing import Any
@@ -31,15 +31,8 @@ from typing_extensions import ParamSpec
 from pytest_static.type_sets import PREDEFINED_INSTANCE_SETS
 
 
-if hasattr(typing, "_UnionGenericAlias"):
-    from typing import _UnionGenericAlias  # type: ignore[attr-defined]
-else:
-    _UnionGenericAlias = type(Union)
-
-if hasattr(typing, "_LiteralSpecialForm"):
-    from typing import _LiteralSpecialForm  # type: ignore[attr-defined]
-else:
-    _LiteralSpecialForm = type(Literal)
+_UnionGenericAlias = type(Union)
+_LiteralSpecialForm = type(Literal)
 
 
 # Redefines pytest's typing for 100% test coverage
@@ -92,7 +85,7 @@ def parametrize_types(
     parameter_sets: list[list[T]] = [
         list(get_all_possible_type_instances(t)) for t in argtypes
     ]
-    parameter_combinations: list[Iterable[itertools.product[tuple[Any, ...]]]] = list(
+    parameter_combinations: list[tuple[T, ...]] = list(
         itertools.product(*parameter_sets)
     )
 

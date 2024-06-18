@@ -1,8 +1,8 @@
 # pytest-static
 
-[![PyPI](https://img.shields.io/pypi/v/pytest-static.svg)][pypi_]
-[![Status](https://img.shields.io/pypi/status/pytest-static.svg)][status]
-[![Python Version](https://img.shields.io/pypi/pyversions/pytest-static)][python version]
+[![PyPI](https://img.shields.io/pypi/v/pytest-static.svg)][pypi status]
+[![Status](https://img.shields.io/pypi/status/pytest-static.svg)][pypi status]
+[![Python Version](https://img.shields.io/pypi/pyversions/pytest-static)][pypi status]
 [![License](https://img.shields.io/pypi/l/pytest-static)][license]
 
 [![Read the documentation at https://pytest-static.readthedocs.io/](https://img.shields.io/readthedocs/pytest-static/latest.svg?label=Read%20the%20Docs)][read the docs]
@@ -12,47 +12,16 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)][pre-commit]
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)][black]
 
-[pypi_]: https://pypi.org/project/pytest-static/
-[status]: https://pypi.org/project/pytest-static/
-[python version]: https://pypi.org/project/pytest-static
+[pypi status]: https://pypi.org/project/pytest-static/
 [read the docs]: https://pytest-static.readthedocs.io/
 [tests]: https://github.com/56kyle/pytest-static/actions?workflow=Tests
 [codecov]: https://app.codecov.io/gh/56kyle/pytest-static
 [pre-commit]: https://github.com/pre-commit/pre-commit
 [black]: https://github.com/psf/black
 
-## Overview
-
-pytest-static is a pytest plugin that allows you to parametrize your tests using type annotations.
-
-What this looks like in practice is that you can write a test like this:
-
-```python
-import pytest
-from typing import Tuple
-
-
-@pytest.mark.parametrize_types("a", [Tuple[bool, bool]])
-def test_a(a: bool) -> None:
-    assert isinstance(a, bool)
-```
-
-Which would be equivalent to the following test
-
-```python
-import pytest
-
-
-@pytest.mark.parametrize("a", [(True, True), (True, False), (False, True), (False, False)])
-def test_a(a: int) -> None:
-    assert isinstance(a, int)
-```
-
-For types such as int, str, etc that have an unlimited amount of values, there are premade sets meant to cover common edge cases that are used by default
-
-However, you can also override these defaults if you wish by passing an instance of Config with some custom handlers set.
-
 ## Features
+
+- TODO
 
 ## Requirements
 
