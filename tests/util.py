@@ -28,16 +28,7 @@ STR_LEN: int = len(PREDEFINED_INSTANCE_SETS[str])
 BYTES_LEN: int = len(PREDEFINED_INSTANCE_SETS[bytes])
 NONE_LEN: int = 1
 ELLIPSIS_LEN: int = 0
-ANY_LEN: int = (
-    BOOL_LEN
-    + INT_LEN
-    + FLOAT_LEN
-    + COMPLEX_LEN
-    + STR_LEN
-    + BYTES_LEN
-    + NONE_LEN
-    + ELLIPSIS_LEN
-)
+ANY_LEN: int = BOOL_LEN + INT_LEN + FLOAT_LEN + COMPLEX_LEN + STR_LEN + BYTES_LEN + NONE_LEN + ELLIPSIS_LEN
 
 
 SPECIAL_TYPE_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
@@ -151,15 +142,11 @@ def _get_origin_string(annotation: Any) -> str:
         annotation_name = annotation.__name__
     elif origin is not None:
         annotation_name_with_generics: str = str(annotation)
-        annotation_name = annotation_name_with_generics.split("[")[
-            0
-        ]  # Should never not be a generic here
+        annotation_name = annotation_name_with_generics.split("[")[0]  # Should never not be a generic here
     else:
         annotation_name = str(annotation)
 
-    annotation_name_without_module: str = _remove_typing_module_from_str(
-        annotation_name
-    )
+    annotation_name_without_module: str = _remove_typing_module_from_str(annotation_name)
     if annotation_name_without_module == "Optional":
         return "Union"
     return annotation_name_without_module

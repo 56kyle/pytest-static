@@ -21,7 +21,5 @@ from tests.util import _get_origin_string
         (Dict[int, int], "Dict"),
     ],
 )
-def test__get_origin_string_with_special_generic_alias(
-    annotation: Any, expected: str
-) -> None:
+def test__get_origin_string_with_special_generic_alias(annotation: Any, expected: str) -> None:
     assert _get_origin_string(annotation) == expected
