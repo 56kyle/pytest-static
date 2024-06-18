@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import typing
 from typing import Any
 from typing import Dict
 from typing import FrozenSet
@@ -10,13 +11,15 @@ from typing import Optional
 from typing import Set
 from typing import Tuple
 from typing import Union
-from typing import _SpecialGenericAlias
 
 from typing_extensions import Literal
 from typing_extensions import get_args
 from typing_extensions import get_origin
 
 from pytest_static.type_sets import PREDEFINED_INSTANCE_SETS
+
+
+_SpecialGenericAlias = getattr(typing, "_SpecialGenericAlias", None)
 
 
 # Predefined Instance Set Lengths
