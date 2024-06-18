@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import sys
 from typing import Any
 from typing import Dict
 from typing import FrozenSet
@@ -11,16 +10,13 @@ from typing import Optional
 from typing import Set
 from typing import Tuple
 from typing import Union
+from typing import _SpecialGenericAlias  # type: ignore[attr-defined]
 
 from typing_extensions import Literal
 from typing_extensions import get_args
 from typing_extensions import get_origin
 
 from pytest_static.type_sets import PREDEFINED_INSTANCE_SETS
-
-
-if sys.version_info >= (3, 9):
-    from typing import _SpecialGenericAlias  # type: ignore[attr-defined]
 
 
 # Predefined Instance Set Lengths
