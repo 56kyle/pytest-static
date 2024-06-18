@@ -11,25 +11,13 @@ from typing import Optional
 from typing import Set
 from typing import Tuple
 from typing import Union
-from typing import _GenericAlias  # type: ignore[attr-defined]
+from typing import _SpecialGenericAlias
 
 from typing_extensions import Literal
 from typing_extensions import get_args
 from typing_extensions import get_origin
 
 from pytest_static.type_sets import PREDEFINED_INSTANCE_SETS
-
-
-if sys.version_info >= (3, 9):
-    from typing import _SpecialGenericAlias  # type: ignore[attr-defined]
-
-    def _is_special_generic_alias(annotation: Any) -> bool:
-        return isinstance(annotation, _SpecialGenericAlias)
-
-else:
-
-    def _is_special_generic_alias(annotation: Any) -> bool:
-        return isinstance(annotation, _GenericAlias) and annotation._special
 
 
 # Predefined Instance Set Lengths
@@ -190,7 +178,7 @@ def _get_origin_string(annotation: Any) -> str:
         return "None"
     elif annotation in [..., Ellipsis]:
         return "..."
-    elif _is_special_generic_alias(annotation):
+    elif isinstance(annotation, _SpecialGenericAlias):
         annotation_name = getattr(annotation, "__name__", str(annotation))
     elif isinstance(annotation, type):
         annotation_name = annotation.__name__
