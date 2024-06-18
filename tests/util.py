@@ -100,11 +100,11 @@ PRODUCT_TYPE_SEVERAL_GENERIC_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
     (
         Tuple[Union[bool, int], int, Union[bool, str]],
         (BOOL_LEN + INT_LEN) * INT_LEN * (BOOL_LEN + STR_LEN),
-        (tuple[bool, int, str], BOOL_LEN * INT_LEN * STR_LEN),
-        (
-            tuple[Union[bool, int], int, Union[bool, str]],
-            (BOOL_LEN + INT_LEN) * INT_LEN * (BOOL_LEN + STR_LEN),
-        ),
+    ),
+    (tuple[bool, int, str], BOOL_LEN * INT_LEN * STR_LEN),
+    (
+        tuple[Union[bool, int], int, Union[bool, str]],
+        (BOOL_LEN + INT_LEN) * INT_LEN * (BOOL_LEN + STR_LEN),
     ),
 ]
 
