@@ -82,12 +82,8 @@ def parametrize_types(
     if len(argnames) != len(argtypes):
         raise ValueError("Parameter names and types count must match.")
 
-    parameter_sets: list[list[T]] = [
-        list(get_all_possible_type_instances(t)) for t in argtypes
-    ]
-    parameter_combinations: list[tuple[T, ...]] = list(
-        itertools.product(*parameter_sets)
-    )
+    parameter_sets: list[list[T]] = [list(get_all_possible_type_instances(t)) for t in argtypes]
+    parameter_combinations: list[tuple[T, ...]] = list(itertools.product(*parameter_sets))
 
     if ids is None:
         ids = [", ".join(map(repr, pairs)) for pairs in parameter_combinations]
@@ -120,9 +116,7 @@ def iter_instances(typ: Any) -> Generator[Any, None, None]:
     base_type: Any = origin if origin is not None else typ
 
     handler: (
-        Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]]
-        | partial[Generator[Any, None, None]]
-        | None
+        Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]] | partial[Generator[Any, None, None]] | None
     ) = TYPE_HANDLERS.get(base_type, None)
 
     if handler is None:
@@ -131,28 +125,20 @@ def iter_instances(typ: Any) -> Generator[Any, None, None]:
         yield from handler(base_type, type_args)
 
 
-def _iter_literal_instances(
-    base_type: Any, type_args: tuple[Any, ...]
-) -> Generator[Any, None, None]:
+def _iter_literal_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
     yield from type_args
 
 
-def _iter_any_instances(
-    base_type: Any, type_args: tuple[Any, ...]
-) -> Generator[Any, None, None]:
+def _iter_any_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
     for typ in PREDEFINED_INSTANCE_SETS.keys():
         yield from iter_instances(typ)
 
 
-def _iter_predefined_instances(
-    base_type: Any, type_args: tuple[Any, ...]
-) -> Generator[Any, None, None]:
+def _iter_predefined_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
     yield from PREDEFINED_INSTANCE_SETS[base_type]
 
 
-def _iter_sum_instances(
-    _: Any, type_args: tuple[Any, ...]
-) -> Generator[Any, None, None]:
+def _iter_sum_instances(_: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
     for arg in type_args:
         yield from get_all_possible_type_instances(arg)
 
@@ -166,25 +152,16 @@ def _iter_product_instances_with_constructor(
     if Ellipsis in type_args:
         type_args = type_args[:-1]
 
-    combinations: Iterable[Iterable[Any]] = itertools.product(
-        *(iter_instances(arg) for arg in type_args)
-    )
+    combinations: Iterable[Iterable[Any]] = itertools.product(*(iter_instances(arg) for arg in type_args))
     yield from map(type_constructor, map(tuple, combinations))
 
 
-def _validate_combination_length(
-    combination: tuple[Any, ...], expected_length: int, typ: type[Any]
-) -> None:
+def _validate_combination_length(combination: tuple[Any, ...], expected_length: int, typ: type[Any]) -> None:
     if len(combination) != expected_length:
-        raise TypeError(
-            f"Expected combination of length {expected_length} for "
-            f"type {typ}. Got {len(combination)}"
-        )
+        raise TypeError(f"Expected combination of length {expected_length} for " f"type {typ}. Got {len(combination)}")
 
 
-def _iter_custom_instances(
-    base_type: Any, type_args: tuple[Any, ...]
-) -> Generator[Any, None, None]:
+def _iter_custom_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
     """Planned for future, but not yet implemented."""
     raise NotImplementedError
 
@@ -205,9 +182,7 @@ def _set_constructor(combination: tuple[T]) -> set[T]:
 
 
 def _frozenset_constructor(combination: tuple[T]) -> frozenset[T]:
-    _validate_combination_length(
-        combination=combination, expected_length=1, typ=frozenset
-    )
+    _validate_combination_length(combination=combination, expected_length=1, typ=frozenset)
     return frozenset(combination)
 
 
@@ -240,15 +215,14 @@ _iter_tuple_instances: partial[Generator[Any, None, None]] = partial(
 )
 
 
-PREDEFINED_TYPE_SET_HANDLERS: dict[
-    type[Any], Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]]
-] = {typ: _iter_predefined_instances for typ in PREDEFINED_INSTANCE_SETS.keys()}
+PREDEFINED_TYPE_SET_HANDLERS: dict[type[Any], Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]]] = {
+    typ: _iter_predefined_instances for typ in PREDEFINED_INSTANCE_SETS.keys()
+}
 
 
 TYPE_HANDLERS: dict[
     Any,
-    Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]]
-    | partial[Generator[Any, None, None]],
+    Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]] | partial[Generator[Any, None, None]],
 ] = {
     **PREDEFINED_TYPE_SET_HANDLERS,
     Literal: _iter_literal_instances,

@@ -40,9 +40,7 @@ def assert_len(iterable: Iterable[Any], expected: int) -> None:
 
 
 def test_get_all_possible_type_instances(monkeypatch: MonkeyPatch) -> None:
-    monkeypatch.setattr(
-        pytest_static.parametric, "iter_instances", dummy_iter_instances
-    )
+    monkeypatch.setattr(pytest_static.parametric, "iter_instances", dummy_iter_instances)
     assert get_all_possible_type_instances(int) == (1, 2, 3)
 
 

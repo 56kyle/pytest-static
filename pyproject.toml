@@ -64,6 +64,9 @@ pytest-static = "pytest_static.__main__:main"
 [tool.poetry.plugins."pytest"]
 pytest-static= "pytest_static.plugin"
 
+[tool.black]
+line-length = 120
+
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
 tests = ["tests", "*/tests"]
