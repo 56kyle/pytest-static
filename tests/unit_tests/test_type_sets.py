@@ -8,7 +8,7 @@ from pytest_static.type_sets import FOREIGN_CHARS
 from pytest_static.type_sets import INT_PARAMS
 from pytest_static.type_sets import LOWERCASE_LETTERS
 from pytest_static.type_sets import PREDEFINED_INSTANCE_SETS
-from pytest_static.type_sets import SPECIAL_CHARS
+from pytest_static.type_sets import PUNCTUATION
 from pytest_static.type_sets import STR_PARAMS
 from pytest_static.type_sets import TRIPLE_QUOTES
 from pytest_static.type_sets import UNICODE_CHARS
@@ -35,7 +35,7 @@ def test_whitespace() -> None:
 
 
 def test_special_chars() -> None:
-    assert SPECIAL_CHARS
+    assert PUNCTUATION
 
 
 def test_digits() -> None:

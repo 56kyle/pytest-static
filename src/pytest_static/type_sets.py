@@ -24,40 +24,8 @@ INT_PARAMS: Set[int] = {
     -9223372036854775808,
 }
 
-WHITESPACE: Set[str] = {" ", "\t", "\n", "\r", "\v", "\f"}
-SPECIAL_CHARS: Set[str] = {
-    "!",
-    "@",
-    "#",
-    "$",
-    "%",
-    "^",
-    "&",
-    "*",
-    "(",
-    ")",
-    "-",
-    "+",
-    "=",
-    "{",
-    "}",
-    "[",
-    "]",
-    "|",
-    "\\",
-    ";",
-    ":",
-    "'",
-    '"',
-    ",",
-    "<",
-    ".",
-    ">",
-    "/",
-    "?",
-    "`",
-    "~",
-}
+WHITESPACE: Set[str] = set(string.whitespace)
+PUNCTUATION: Set[str] = set(string.punctuation)
 DIGITS: Set[str] = set(string.digits)
 LOWERCASE_LETTERS: Set[str] = set(string.ascii_lowercase)
 UPPERCASE_LETTERS: Set[str] = set(string.ascii_uppercase)
@@ -85,7 +53,7 @@ TRIPLE_QUOTES: Set[str] = {'"""', "'''"}
 STR_PARAMS: Set[str] = {
     "",
     *WHITESPACE,
-    *SPECIAL_CHARS,
+    *PUNCTUATION,
     *DIGITS,
     *LOWERCASE_LETTERS,
     *UPPERCASE_LETTERS,
