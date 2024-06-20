@@ -1,19 +1,19 @@
+from pytest_static.type_sets import BOOL_PARAMS
+from pytest_static.type_sets import BYTES_PARAMS
+from pytest_static.type_sets import COMPLEX_PARAMS
+from pytest_static.type_sets import DIGITS
+from pytest_static.type_sets import ESCAPE_SEQUENCES
+from pytest_static.type_sets import FLOAT_PARAMS
+from pytest_static.type_sets import FOREIGN_CHARS
+from pytest_static.type_sets import INT_PARAMS
+from pytest_static.type_sets import LOWERCASE_LETTERS
 from pytest_static.type_sets import PREDEFINED_INSTANCE_SETS
-from pytest_static.type_sets import BoolParams
-from pytest_static.type_sets import BytesParams
-from pytest_static.type_sets import ComplexParams
-from pytest_static.type_sets import Digits
-from pytest_static.type_sets import EscapeSequences
-from pytest_static.type_sets import FloatParams
-from pytest_static.type_sets import ForeignChars
-from pytest_static.type_sets import IntParams
-from pytest_static.type_sets import LowercaseLetters
-from pytest_static.type_sets import SpecialChars
-from pytest_static.type_sets import StrParams
-from pytest_static.type_sets import TripleQuotes
-from pytest_static.type_sets import UnicodeChars
-from pytest_static.type_sets import UppercaseLetters
-from pytest_static.type_sets import Whitespace
+from pytest_static.type_sets import SPECIAL_CHARS
+from pytest_static.type_sets import STR_PARAMS
+from pytest_static.type_sets import TRIPLE_QUOTES
+from pytest_static.type_sets import UNICODE_CHARS
+from pytest_static.type_sets import UPPERCASE_LETTERS
+from pytest_static.type_sets import WHITESPACE
 
 
 def test_type_sets() -> None:
@@ -23,60 +23,60 @@ def test_type_sets() -> None:
 
 
 def test_bool_params() -> None:
-    assert BoolParams
+    assert BOOL_PARAMS
 
 
 def test_int_params() -> None:
-    assert IntParams
+    assert INT_PARAMS
 
 
 def test_whitespace() -> None:
-    assert Whitespace
+    assert WHITESPACE
 
 
 def test_special_chars() -> None:
-    assert SpecialChars
+    assert SPECIAL_CHARS
 
 
 def test_digits() -> None:
-    assert Digits
+    assert DIGITS
 
 
 def test_lowercase_letters() -> None:
-    assert LowercaseLetters
+    assert LOWERCASE_LETTERS
 
 
 def test_uppercase_letters() -> None:
-    assert UppercaseLetters
+    assert UPPERCASE_LETTERS
 
 
 def test_unicode_chars() -> None:
-    assert UnicodeChars
+    assert UNICODE_CHARS
 
 
 def test_foreign_chars() -> None:
-    assert ForeignChars
+    assert FOREIGN_CHARS
 
 
 def test_escape_sequences() -> None:
-    assert EscapeSequences
+    assert ESCAPE_SEQUENCES
 
 
 def test_triple_quotes() -> None:
-    assert TripleQuotes
+    assert TRIPLE_QUOTES
 
 
 def test_str_params() -> None:
-    assert StrParams
+    assert STR_PARAMS
 
 
 def test_float_params() -> None:
-    assert FloatParams
+    assert FLOAT_PARAMS
 
 
 def test_complex_params() -> None:
-    assert ComplexParams
+    assert COMPLEX_PARAMS
 
 
 def test_bytes_params() -> None:
-    assert BytesParams
+    assert BYTES_PARAMS

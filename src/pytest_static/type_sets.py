@@ -1,5 +1,6 @@
 """Default type sets for pytest_static to use in parametrization."""
 
+import string
 from typing import Any
 from typing import Dict
 from typing import Set
@@ -9,9 +10,9 @@ from typing import TypeVar
 T = TypeVar("T", bound=Any)
 
 
-BoolParams: Set[bool] = {True, False}
+BOOL_PARAMS: Set[bool] = {True, False}
 
-IntParams: Set[int] = {
+INT_PARAMS: Set[int] = {
     0,
     1,
     -1,
@@ -23,8 +24,8 @@ IntParams: Set[int] = {
     -9223372036854775808,
 }
 
-Whitespace: Set[str] = {" ", "\t", "\n", "\r", "\v", "\f"}
-SpecialChars: Set[str] = {
+WHITESPACE: Set[str] = {" ", "\t", "\n", "\r", "\v", "\f"}
+SPECIAL_CHARS: Set[str] = {
     "!",
     "@",
     "#",
@@ -57,64 +58,10 @@ SpecialChars: Set[str] = {
     "`",
     "~",
 }
-Digits: Set[str] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
-LowercaseLetters: Set[str] = {
-    "a",
-    "b",
-    "c",
-    "d",
-    "e",
-    "f",
-    "g",
-    "h",
-    "i",
-    "j",
-    "k",
-    "l",
-    "m",
-    "n",
-    "o",
-    "p",
-    "q",
-    "r",
-    "s",
-    "t",
-    "u",
-    "v",
-    "w",
-    "x",
-    "y",
-    "z",
-}
-UppercaseLetters: Set[str] = {
-    "A",
-    "B",
-    "C",
-    "D",
-    "E",
-    "F",
-    "G",
-    "H",
-    "I",
-    "J",
-    "K",
-    "L",
-    "M",
-    "N",
-    "O",
-    "P",
-    "Q",
-    "R",
-    "S",
-    "T",
-    "U",
-    "V",
-    "W",
-    "X",
-    "Y",
-    "Z",
-}
-UnicodeChars: Set[str] = {
+DIGITS: Set[str] = set(string.digits)
+LOWERCASE_LETTERS: Set[str] = set(string.ascii_lowercase)
+UPPERCASE_LETTERS: Set[str] = set(string.ascii_uppercase)
+UNICODE_CHARS: Set[str] = {
     "\u00E9",
     "\u00F1",
     "\u2603",
@@ -122,8 +69,8 @@ UnicodeChars: Set[str] = {
     "\u00AE",
     "\U0001F600",
 }
-ForeignChars: Set[str] = {"Д", "д", "ב", "ע", "α", "Ω", "い", "ろ", "は", "我", "们"}
-EscapeSequences: Set[str] = {
+FOREIGN_CHARS: Set[str] = {"Д", "д", "ב", "ע", "α", "Ω", "い", "ろ", "は", "我", "们"}
+ESCAPE_SEQUENCES: Set[str] = {
     "\\\\",
     "\\'",
     '\\"',
@@ -133,22 +80,22 @@ EscapeSequences: Set[str] = {
     "\\x00",
     "\\x7F",
 }
-TripleQuotes: Set[str] = {'"""', "'''"}
+TRIPLE_QUOTES: Set[str] = {'"""', "'''"}
 
-StrParams: Set[str] = {
+STR_PARAMS: Set[str] = {
     "",
-    *Whitespace,
-    *SpecialChars,
-    *Digits,
-    *LowercaseLetters,
-    *UppercaseLetters,
-    *UnicodeChars,
-    *ForeignChars,
-    *EscapeSequences,
-    *TripleQuotes,
+    *WHITESPACE,
+    *SPECIAL_CHARS,
+    *DIGITS,
+    *LOWERCASE_LETTERS,
+    *UPPERCASE_LETTERS,
+    *UNICODE_CHARS,
+    *FOREIGN_CHARS,
+    *ESCAPE_SEQUENCES,
+    *TRIPLE_QUOTES,
 }
 
-FloatParams: Set[float] = {
+FLOAT_PARAMS: Set[float] = {
     0.0,
     -0.0,
     1.0,
@@ -162,7 +109,7 @@ FloatParams: Set[float] = {
     float("nan"),
 }
 
-ComplexParams: Set[complex] = {
+COMPLEX_PARAMS: Set[complex] = {
     0j,
     1j,
     -1j,
@@ -178,7 +125,7 @@ ComplexParams: Set[complex] = {
     (-1e10 - 1e10j),
 }
 
-BytesParams: Set[bytes] = {
+BYTES_PARAMS: Set[bytes] = {
     b"",
     b"\x00",
     b"\xFF",
@@ -210,12 +157,12 @@ BytesParams: Set[bytes] = {
 
 
 PREDEFINED_INSTANCE_SETS: Dict[Any, Set[Any]] = {
-    bool: BoolParams,
-    int: IntParams,
-    float: FloatParams,
-    complex: ComplexParams,
-    str: StrParams,
-    bytes: BytesParams,
+    bool: BOOL_PARAMS,
+    int: INT_PARAMS,
+    float: FLOAT_PARAMS,
+    complex: COMPLEX_PARAMS,
+    str: STR_PARAMS,
+    bytes: BYTES_PARAMS,
     type(None): {None},
     ...: set(),
     Ellipsis: set(),
