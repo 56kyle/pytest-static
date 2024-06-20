@@ -1,4 +1,5 @@
 """Default type sets for pytest_static to use in parametrization."""
+
 from typing import Any
 from typing import Dict
 from typing import Set
