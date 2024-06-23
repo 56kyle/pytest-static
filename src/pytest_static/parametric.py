@@ -3,22 +3,16 @@
 from __future__ import annotations
 
 import itertools
-import sys
 import types
 from enum import Enum
 from functools import partial
 from typing import Any
 from typing import Callable
-from typing import Dict
-from typing import FrozenSet
 from typing import Generator
 from typing import Iterable
-from typing import List
+from typing import Mapping
 from typing import Optional
 from typing import Sequence
-from typing import Set
-from typing import Tuple
-from typing import TypeVar
 from typing import Union
 from typing import get_args
 from typing import get_origin
@@ -26,45 +20,14 @@ from typing import get_origin
 from _pytest.mark import Mark
 from _pytest.python import Metafunc
 from typing_extensions import Literal
-from typing_extensions import ParamSpec
 
-from pytest_static.type_sets import PREDEFINED_INSTANCE_SETS
-
-
-_UnionGenericAlias = type(Union)
-_LiteralSpecialForm = type(Literal)
-
-
-# Redefines pytest's typing for 100% test coverage
-_ScopeName = Literal["session", "package", "module", "class", "function"]
-
-T = TypeVar("T")
-T_co = TypeVar("T_co", covariant=True)
-KT = TypeVar("KT")
-VT = TypeVar("VT")
-P = ParamSpec("P")
-
-# Using algebraic data typing
-SPECIAL_TYPES_SET: set[Any] = {Literal, Ellipsis, Any}
-SUM_TYPES_SET: set[Any] = {Union, Optional, Enum}
-PRODUCT_TYPES_SET: set[Any] = {
-    List,
-    list,
-    Set,
-    set,
-    FrozenSet,
-    frozenset,
-    Dict,
-    dict,
-    Tuple,
-    tuple,
-}
-
-
-if sys.version_info >= (3, 10):
-    UNION_TYPES: set[Any] = {Union, _UnionGenericAlias, types.UnionType}
-else:
-    UNION_TYPES: set[Any] = {Union, _UnionGenericAlias}
+from pytest_static.custom_typing import KT
+from pytest_static.custom_typing import VT
+from pytest_static.custom_typing import T
+from pytest_static.custom_typing import T_co
+from pytest_static.custom_typing import TypeHandler
+from pytest_static.custom_typing import _ScopeName
+from pytest_static.type_sets import predefined_type_sets
 
 
 def parametrize_types(
@@ -115,9 +78,7 @@ def iter_instances(typ: Any) -> Generator[Any, None, None]:
     type_args: tuple[Any, ...] = get_args(typ)
     base_type: Any = origin if origin is not None else typ
 
-    handler: (
-        Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]] | partial[Generator[Any, None, None]] | None
-    ) = TYPE_HANDLERS.get(base_type, None)
+    handler: TypeHandler | partial[Generator[Any, None, None]] | None = type_handlers.get(base_type, None)
 
     if handler is None:
         yield from _iter_custom_instances(base_type, type_args)
@@ -130,12 +91,12 @@ def _iter_literal_instances(base_type: Any, type_args: tuple[Any, ...]) -> Gener
 
 
 def _iter_any_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
-    for typ in PREDEFINED_INSTANCE_SETS.keys():
+    for typ in predefined_type_sets.keys():
         yield from iter_instances(typ)
 
 
 def _iter_predefined_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
-    yield from PREDEFINED_INSTANCE_SETS[base_type]
+    yield from predefined_type_sets[base_type]
 
 
 def _iter_sum_instances(_: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
@@ -215,16 +176,13 @@ _iter_tuple_instances: partial[Generator[Any, None, None]] = partial(
 )
 
 
-PREDEFINED_TYPE_SET_HANDLERS: dict[type[Any], Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]]] = {
-    typ: _iter_predefined_instances for typ in PREDEFINED_INSTANCE_SETS.keys()
+__primitive_type_handlers: dict[type[Any], TypeHandler] = {
+    typ: _iter_predefined_instances for typ in predefined_type_sets.keys()
 }
 
 
-TYPE_HANDLERS: dict[
-    Any,
-    Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]] | partial[Generator[Any, None, None]],
-] = {
-    **PREDEFINED_TYPE_SET_HANDLERS,
+DEFAULT_TYPE_HANDLERS: dict[Any, TypeHandler | partial[Generator[Any, None, None]]] = {
+    **__primitive_type_handlers,
     Literal: _iter_literal_instances,
     Any: _iter_any_instances,
     Union: _iter_sum_instances,
@@ -236,3 +194,8 @@ TYPE_HANDLERS: dict[
     frozenset: _iter_frozenset_instances,
     tuple: _iter_tuple_instances,
 }
+
+
+type_handlers: Mapping[Any, TypeHandler | partial[Generator[Any, None, None]]] = types.MappingProxyType(
+    mapping=DEFAULT_TYPE_HANDLERS
+)

@@ -7,18 +7,18 @@ from pytest_static.type_sets import FLOAT_PARAMS
 from pytest_static.type_sets import FOREIGN_CHARS
 from pytest_static.type_sets import INT_PARAMS
 from pytest_static.type_sets import LOWERCASE_LETTERS
-from pytest_static.type_sets import PREDEFINED_INSTANCE_SETS
 from pytest_static.type_sets import PUNCTUATION
 from pytest_static.type_sets import STR_PARAMS
 from pytest_static.type_sets import TRIPLE_QUOTES
 from pytest_static.type_sets import UNICODE_CHARS
 from pytest_static.type_sets import UPPERCASE_LETTERS
 from pytest_static.type_sets import WHITESPACE
+from pytest_static.type_sets import predefined_type_sets
 
 
 def test_type_sets() -> None:
-    assert PREDEFINED_INSTANCE_SETS
-    for type_set in PREDEFINED_INSTANCE_SETS.values():
+    assert predefined_type_sets
+    for type_set in predefined_type_sets.values():
         assert type_set is not None
 
 
