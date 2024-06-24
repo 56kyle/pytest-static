@@ -11,11 +11,11 @@ from typing import Generic
 from typing import Iterable
 
 from typing_extensions import get_args
-from typing_extensions import get_origin
 
 from pytest_static.custom_typing import KT
 from pytest_static.custom_typing import VT
 from pytest_static.custom_typing import TypeHandler
+from pytest_static.util import get_base_type
 
 
 class TypeHandlerRegistry(Generic[KT, VT]):
@@ -49,8 +49,7 @@ class TypeHandlerRegistry(Generic[KT, VT]):
 
         def decorator(fn: TypeHandler) -> TypeHandler:
             for key in args:
-                origin: Any = get_origin(key)
-                base_type: Any = origin if origin is not None else key
+                base_type: Any = get_base_type(key)
                 if self._proxy.get(base_type, MISSING) is MISSING:
                     self._mapping[base_type] = []
                 self._mapping[base_type].append(fn)
@@ -64,8 +63,7 @@ class TypeHandlerRegistry(Generic[KT, VT]):
 
     def iter_instances(self, key: KT) -> Generator[VT, ...]:
         """Returns a Generator that yields from all handlers."""
-        origin: Any = get_origin(key)
-        base_type: Any = origin if origin is not None else key
+        base_type: Any = get_base_type(key)
         type_args: tuple[Any, ...] = get_args(key)
 
         handlers: Iterable[TypeHandler] = self._proxy.get(base_type, None)
