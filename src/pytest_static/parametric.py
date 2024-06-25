@@ -130,6 +130,10 @@ def _iter_sum_instances(_: Any, type_args: tuple[Any, ...]) -> Generator[Any, No
         yield from get_all_possible_type_instances(arg)
 
 
+def _iter_combinations(type_args: tuple[Any, ...]) -> Generator[tuple[Any, ...], None, None]:
+    yield from map(tuple, itertools.product(*map(type_handlers.iter_instances, type_args)))
+
+
 def _iter_product_instances_with_constructor(
     _: Any,
     type_args: tuple[Any, ...],
@@ -138,9 +142,7 @@ def _iter_product_instances_with_constructor(
 ) -> Generator[T_co, None, None]:
     if Ellipsis in type_args:
         type_args = type_args[:-1]
-
-    combinations: Iterable[Iterable[Any]] = itertools.product(*(type_handlers.iter_instances(arg) for arg in type_args))
-    yield from map(type_constructor, map(tuple, combinations))
+    yield from map(type_constructor, _iter_combinations(type_args))
 
 
 def _validate_combination_length(combination: tuple[Any, ...], expected_length: int, typ: type[Any]) -> None:
