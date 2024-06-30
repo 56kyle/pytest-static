@@ -3,68 +3,36 @@
 from __future__ import annotations
 
 import itertools
-import sys
-import types
 from enum import Enum
 from functools import partial
 from typing import Any
 from typing import Callable
-from typing import Dict
-from typing import FrozenSet
 from typing import Generator
 from typing import Iterable
-from typing import List
 from typing import Optional
 from typing import Sequence
-from typing import Set
-from typing import Tuple
-from typing import TypeVar
 from typing import Union
-from typing import get_args
-from typing import get_origin
 
 from _pytest.mark import Mark
 from _pytest.python import Metafunc
 from typing_extensions import Literal
-from typing_extensions import ParamSpec
 
-from pytest_static.type_sets import PREDEFINED_INSTANCE_SETS
-
-
-_UnionGenericAlias = type(Union)
-_LiteralSpecialForm = type(Literal)
-
-
-# Redefines pytest's typing for 100% test coverage
-_ScopeName = Literal["session", "package", "module", "class", "function"]
-
-T = TypeVar("T")
-T_co = TypeVar("T_co", covariant=True)
-KT = TypeVar("KT")
-VT = TypeVar("VT")
-P = ParamSpec("P")
-
-# Using algebraic data typing
-SPECIAL_TYPES_SET: set[Any] = {Literal, Ellipsis, Any}
-SUM_TYPES_SET: set[Any] = {Union, Optional, Enum}
-PRODUCT_TYPES_SET: set[Any] = {
-    List,
-    list,
-    Set,
-    set,
-    FrozenSet,
-    frozenset,
-    Dict,
-    dict,
-    Tuple,
-    tuple,
-}
+from pytest_static.custom_typing import KT
+from pytest_static.custom_typing import VT
+from pytest_static.custom_typing import T
+from pytest_static.custom_typing import T_co
+from pytest_static.custom_typing import _ScopeName
+from pytest_static.type_handler import TypeHandlerRegistry
+from pytest_static.type_sets import BOOL_PARAMS
+from pytest_static.type_sets import BYTES_PARAMS
+from pytest_static.type_sets import COMPLEX_PARAMS
+from pytest_static.type_sets import DEFAULT_INSTANCE_SETS
+from pytest_static.type_sets import FLOAT_PARAMS
+from pytest_static.type_sets import INT_PARAMS
+from pytest_static.type_sets import STR_PARAMS
 
 
-if sys.version_info >= (3, 10):
-    UNION_TYPES: set[Any] = {Union, _UnionGenericAlias, types.UnionType}
-else:
-    UNION_TYPES: set[Any] = {Union, _UnionGenericAlias}
+type_handlers: TypeHandlerRegistry = TypeHandlerRegistry()
 
 
 def parametrize_types(
@@ -104,43 +72,65 @@ def _ensure_sequence(value: str | Sequence[str]) -> Sequence[str]:
     return value
 
 
-def get_all_possible_type_instances(type_argument: type[T]) -> tuple[T, ...]:
+def get_all_possible_type_instances(type_argument: Any) -> tuple[Any, ...]:
     """Gets all possible instances for the given type."""
-    return tuple(iter_instances(type_argument))
+    return tuple(type_handlers.iter_instances(type_argument))
 
 
-def iter_instances(typ: Any) -> Generator[Any, None, None]:
-    """Iterates over all possible instances of the given type."""
-    origin: Any = get_origin(typ)
-    type_args: tuple[Any, ...] = get_args(typ)
-    base_type: Any = origin if origin is not None else typ
-
-    handler: (
-        Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]] | partial[Generator[Any, None, None]] | None
-    ) = TYPE_HANDLERS.get(base_type, None)
-
-    if handler is None:
-        yield from _iter_custom_instances(base_type, type_args)
-    else:
-        yield from handler(base_type, type_args)
+@type_handlers.register(type(None))
+def _iter_none_instanes(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    yield None
 
 
+@type_handlers.register(bool)
+def _iter_bool_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    yield from BOOL_PARAMS
+
+
+@type_handlers.register(int)
+def _iter_int_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    yield from INT_PARAMS
+
+
+@type_handlers.register(float)
+def _iter_float_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    yield from FLOAT_PARAMS
+
+
+@type_handlers.register(complex)
+def _iter_complex_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    yield from COMPLEX_PARAMS
+
+
+@type_handlers.register(str)
+def _iter_str_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    yield from STR_PARAMS
+
+
+@type_handlers.register(bytes)
+def _iter_bytes_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    yield from BYTES_PARAMS
+
+
+@type_handlers.register(Literal)
 def _iter_literal_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
     yield from type_args
 
 
+@type_handlers.register(Any)
 def _iter_any_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
-    for typ in PREDEFINED_INSTANCE_SETS.keys():
-        yield from iter_instances(typ)
+    for typ in DEFAULT_INSTANCE_SETS.keys():
+        yield from type_handlers.iter_instances(typ)
 
 
-def _iter_predefined_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
-    yield from PREDEFINED_INSTANCE_SETS[base_type]
-
-
+@type_handlers.register(Union, Optional, Enum)
 def _iter_sum_instances(_: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
     for arg in type_args:
         yield from get_all_possible_type_instances(arg)
+
+
+def _iter_combinations(type_args: tuple[Any, ...]) -> Generator[tuple[Any, ...], None, None]:
+    yield from map(tuple, itertools.product(*map(type_handlers.iter_instances, type_args)))
 
 
 def _iter_product_instances_with_constructor(
@@ -151,9 +141,7 @@ def _iter_product_instances_with_constructor(
 ) -> Generator[T_co, None, None]:
     if Ellipsis in type_args:
         type_args = type_args[:-1]
-
-    combinations: Iterable[Iterable[Any]] = itertools.product(*(iter_instances(arg) for arg in type_args))
-    yield from map(type_constructor, map(tuple, combinations))
+    yield from map(type_constructor, _iter_combinations(type_args))
 
 
 def _validate_combination_length(combination: tuple[Any, ...], expected_length: int, typ: type[Any]) -> None:
@@ -193,46 +181,28 @@ def _tuple_constructor(combination: T) -> T:
 _iter_dict_instances: partial[Generator[Any, None, None]] = partial(
     _iter_product_instances_with_constructor, type_constructor=_dict_constructor
 )
+type_handlers.register(dict)(_iter_dict_instances)
 
 
 _iter_list_instances: partial[Generator[Any, None, None]] = partial(
     _iter_product_instances_with_constructor, type_constructor=_list_constructor
 )
+type_handlers.register(list)(_iter_list_instances)
 
 
 _iter_set_instances: partial[Generator[Any, None, None]] = partial(
     _iter_product_instances_with_constructor, type_constructor=_set_constructor
 )
+type_handlers.register(set)(_iter_set_instances)
 
 
 _iter_frozenset_instances: partial[Generator[Any, None, None]] = partial(
     _iter_product_instances_with_constructor, type_constructor=_frozenset_constructor
 )
+type_handlers.register(frozenset)(_iter_frozenset_instances)
 
 
 _iter_tuple_instances: partial[Generator[Any, None, None]] = partial(
     _iter_product_instances_with_constructor, type_constructor=_tuple_constructor
 )
-
-
-PREDEFINED_TYPE_SET_HANDLERS: dict[type[Any], Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]]] = {
-    typ: _iter_predefined_instances for typ in PREDEFINED_INSTANCE_SETS.keys()
-}
-
-
-TYPE_HANDLERS: dict[
-    Any,
-    Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]] | partial[Generator[Any, None, None]],
-] = {
-    **PREDEFINED_TYPE_SET_HANDLERS,
-    Literal: _iter_literal_instances,
-    Any: _iter_any_instances,
-    Union: _iter_sum_instances,
-    Optional: _iter_sum_instances,
-    Enum: _iter_sum_instances,
-    dict: _iter_dict_instances,
-    list: _iter_list_instances,
-    set: _iter_set_instances,
-    frozenset: _iter_frozenset_instances,
-    tuple: _iter_tuple_instances,
-}
+type_handlers.register(tuple)(_iter_tuple_instances)
