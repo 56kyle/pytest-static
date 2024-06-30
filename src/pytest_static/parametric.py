@@ -27,10 +27,10 @@ from pytest_static.type_handler import TypeHandlerRegistry
 from pytest_static.type_sets import BOOL_PARAMS
 from pytest_static.type_sets import BYTES_PARAMS
 from pytest_static.type_sets import COMPLEX_PARAMS
+from pytest_static.type_sets import DEFAULT_INSTANCE_SETS
 from pytest_static.type_sets import FLOAT_PARAMS
 from pytest_static.type_sets import INT_PARAMS
 from pytest_static.type_sets import STR_PARAMS
-from pytest_static.type_sets import predefined_type_sets
 
 
 type_handlers: TypeHandlerRegistry[Any, TypeHandler] = TypeHandlerRegistry()
@@ -120,7 +120,7 @@ def _iter_literal_instances(base_type: Any, type_args: tuple[Any, ...]) -> Gener
 
 @type_handlers.register(Any)
 def _iter_any_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
-    for typ in predefined_type_sets.keys():
+    for typ in DEFAULT_INSTANCE_SETS.keys():
         yield from type_handlers.iter_instances(typ)
 
 

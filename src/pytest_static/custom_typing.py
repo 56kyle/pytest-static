@@ -19,6 +19,7 @@ __all__: list[str] = [
     "VT",
     "T_co",
     "P",
+    "TypeHandler",
 ]
 
 

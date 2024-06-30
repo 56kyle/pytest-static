@@ -16,16 +16,16 @@ from typing_extensions import Literal
 from typing_extensions import get_args
 from typing_extensions import get_origin
 
-from pytest_static.type_sets import predefined_type_sets
+from pytest_static.type_sets import DEFAULT_INSTANCE_SETS
 
 
 # Predefined Instance Set Lengths
-BOOL_LEN: int = len(predefined_type_sets[bool])
-INT_LEN: int = len(predefined_type_sets[int])
-FLOAT_LEN: int = len(predefined_type_sets[float])
-COMPLEX_LEN: int = len(predefined_type_sets[complex])
-STR_LEN: int = len(predefined_type_sets[str])
-BYTES_LEN: int = len(predefined_type_sets[bytes])
+BOOL_LEN: int = len(DEFAULT_INSTANCE_SETS[bool])
+INT_LEN: int = len(DEFAULT_INSTANCE_SETS[int])
+FLOAT_LEN: int = len(DEFAULT_INSTANCE_SETS[float])
+COMPLEX_LEN: int = len(DEFAULT_INSTANCE_SETS[complex])
+STR_LEN: int = len(DEFAULT_INSTANCE_SETS[str])
+BYTES_LEN: int = len(DEFAULT_INSTANCE_SETS[bytes])
 NONE_LEN: int = 1
 ELLIPSIS_LEN: int = 0
 ANY_LEN: int = BOOL_LEN + INT_LEN + FLOAT_LEN + COMPLEX_LEN + STR_LEN + BYTES_LEN + NONE_LEN + ELLIPSIS_LEN

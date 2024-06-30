@@ -148,4 +148,4 @@ _default_instance_sets: dict[Any, set[Any]] = {
     type(None): {None},
 }
 
-predefined_type_sets: Mapping[Any, set[Any]] = MappingProxyType(_default_instance_sets)
+DEFAULT_INSTANCE_SETS: Mapping[Any, set[Any]] = MappingProxyType(_default_instance_sets)

@@ -1,6 +1,7 @@
 from pytest_static.type_sets import BOOL_PARAMS
 from pytest_static.type_sets import BYTES_PARAMS
 from pytest_static.type_sets import COMPLEX_PARAMS
+from pytest_static.type_sets import DEFAULT_INSTANCE_SETS
 from pytest_static.type_sets import DIGITS
 from pytest_static.type_sets import ESCAPE_SEQUENCES
 from pytest_static.type_sets import FLOAT_PARAMS
@@ -13,12 +14,11 @@ from pytest_static.type_sets import TRIPLE_QUOTES
 from pytest_static.type_sets import UNICODE_CHARS
 from pytest_static.type_sets import UPPERCASE_LETTERS
 from pytest_static.type_sets import WHITESPACE
-from pytest_static.type_sets import predefined_type_sets
 
 
 def test_type_sets() -> None:
-    assert predefined_type_sets
-    for type_set in predefined_type_sets.values():
+    assert DEFAULT_INSTANCE_SETS
+    for type_set in DEFAULT_INSTANCE_SETS.values():
         assert type_set is not None
 
 

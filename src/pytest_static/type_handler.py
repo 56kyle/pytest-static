@@ -1,4 +1,4 @@
-"""Module containing the TypeHandlerRegistry utility class for providing semi-read only Mappings with selective registration."""
+"""Module containing the TypeHandlerRegistry class for providing semi-read only Mappings with selective registration."""
 
 from __future__ import annotations
 
