@@ -61,7 +61,7 @@ class TypeHandlerRegistry(Generic[KT, VT]):
         """Returns a tuple of instances KT retrieved from the registered callbacks."""
         return tuple(*self.iter_instances(key))
 
-    def iter_instances(self, key: KT) -> Generator[VT, ...]:
+    def iter_instances(self, key: KT) -> Generator[VT, None, None]:
         """Returns a Generator that yields from all handlers."""
         base_type: Any = get_base_type(key)
         type_args: tuple[Any, ...] = get_args(key)
