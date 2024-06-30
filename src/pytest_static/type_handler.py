@@ -7,30 +7,27 @@ from dataclasses import MISSING
 from typing import Any
 from typing import Callable
 from typing import Generator
-from typing import Generic
 from typing import Iterable
 
 from typing_extensions import get_args
 
-from pytest_static.custom_typing import KT
-from pytest_static.custom_typing import VT
 from pytest_static.custom_typing import TypeHandler
 from pytest_static.util import get_base_type
 
 
-class TypeHandlerRegistry(Generic[KT, VT]):
+class TypeHandlerRegistry:
     """Registry for various TypeHandler callbacks."""
 
     def __init__(self, *args: Any, **kwargs: Any):
         """Sets up the Registry."""
-        self._mapping: dict[KT, VT] = {}
-        self._proxy: types.MappingProxyType = types.MappingProxyType(self._mapping)
+        self._mapping: dict[Any, list[TypeHandler]] = {}
+        self._proxy: types.MappingProxyType[Any, list[TypeHandler]] = types.MappingProxyType(self._mapping)
 
-    def __getitem__(self, __key: KT) -> VT:
+    def __getitem__(self, __key: Any) -> Any:
         """Returns from proxy."""
         return self._proxy.__getitem__(__key)
 
-    def register(self, *args: KT) -> Callable[[TypeHandler], TypeHandler]:
+    def register(self, *args: Any) -> Callable[[TypeHandler], TypeHandler]:
         """Returns a decorator that registers a Callback to each of the provided keys.
 
         Usage:
@@ -50,18 +47,18 @@ class TypeHandlerRegistry(Generic[KT, VT]):
         def decorator(fn: TypeHandler) -> TypeHandler:
             for key in args:
                 base_type: Any = get_base_type(key)
-                if self._proxy.get(base_type, MISSING) is MISSING:
+                if self._proxy.get(base_type, MISSING) == MISSING:
                     self._mapping[base_type] = []
                 self._mapping[base_type].append(fn)
-                return fn
+            return fn
 
         return decorator
 
-    def get_instances(self, key: KT) -> tuple[VT, ...]:
-        """Returns a tuple of instances KT retrieved from the registered callbacks."""
+    def get_instances(self, key: Any) -> tuple[Any, ...]:
+        """Returns a tuple of instances retrieved from the registered callbacks."""
         return tuple(*self.iter_instances(key))
 
-    def iter_instances(self, key: KT) -> Generator[VT, None, None]:
+    def iter_instances(self, key: Any) -> Generator[Any, None, None]:
         """Returns a Generator that yields from all handlers."""
         base_type: Any = get_base_type(key)
         type_args: tuple[Any, ...] = get_args(key)

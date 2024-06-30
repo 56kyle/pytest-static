@@ -21,7 +21,6 @@ from pytest_static.custom_typing import KT
 from pytest_static.custom_typing import VT
 from pytest_static.custom_typing import T
 from pytest_static.custom_typing import T_co
-from pytest_static.custom_typing import TypeHandler
 from pytest_static.custom_typing import _ScopeName
 from pytest_static.type_handler import TypeHandlerRegistry
 from pytest_static.type_sets import BOOL_PARAMS
@@ -33,7 +32,7 @@ from pytest_static.type_sets import INT_PARAMS
 from pytest_static.type_sets import STR_PARAMS
 
 
-type_handlers: TypeHandlerRegistry[Any, TypeHandler] = TypeHandlerRegistry()
+type_handlers: TypeHandlerRegistry = TypeHandlerRegistry()
 
 
 def parametrize_types(
@@ -73,7 +72,7 @@ def _ensure_sequence(value: str | Sequence[str]) -> Sequence[str]:
     return value
 
 
-def get_all_possible_type_instances(type_argument: type[T]) -> tuple[T, ...]:
+def get_all_possible_type_instances(type_argument: Any) -> tuple[Any, ...]:
     """Gets all possible instances for the given type."""
     return tuple(type_handlers.iter_instances(type_argument))
 
