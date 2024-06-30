@@ -38,7 +38,7 @@ def assert_len(iterable: Iterable[Any], expected: int) -> None:
 
 
 def test_get_all_possible_type_instances(monkeypatch: MonkeyPatch) -> None:
-    def example_ints(*args: Any, **kwargs: Any) -> Generator[Any, None, None]:
+    def example_ints(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
         yield from [1, 2, 3]
 
     monkeypatch.setitem(type_handlers._mapping, int, [example_ints])

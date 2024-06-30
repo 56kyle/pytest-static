@@ -63,7 +63,7 @@ class TypeHandlerRegistry:
         base_type: Any = get_base_type(key)
         type_args: tuple[Any, ...] = get_args(key)
 
-        handlers: Iterable[TypeHandler] = self._proxy.get(base_type, None)
+        handlers: Iterable[TypeHandler] | None = self._proxy.get(base_type, None)
         if handlers is None:
             raise KeyError(f"Failed to find a handler for {key=}.")
         for handler in handlers:
