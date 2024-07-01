@@ -9,7 +9,6 @@ from typing import Any
 from typing import Callable
 from typing import Generator
 from typing import Iterable
-from typing import Mapping
 from typing import Optional
 from typing import Sequence
 from typing import Union
@@ -81,9 +80,7 @@ def get_all_possible_type_instances(type_argument: Any) -> tuple[Any, ...]:
     return tuple(iter_instances(type_argument))
 
 
-def iter_instances(
-    key: Any, handler_registry: Mapping[Any, list[TypeHandler]] = type_handlers
-) -> Generator[Any, None, None]:
+def iter_instances(key: Any, handler_registry: TypeHandlerRegistry = type_handlers) -> Generator[Any, None, None]:
     """Returns a Generator that yields from all handlers."""
     base_type: Any = get_base_type(key)
     type_args: tuple[Any, ...] = get_args(key)
