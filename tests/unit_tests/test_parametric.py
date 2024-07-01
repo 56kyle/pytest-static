@@ -10,6 +10,7 @@ from _pytest.monkeypatch import MonkeyPatch
 from typing_extensions import ParamSpec
 
 from pytest_static.parametric import get_all_possible_type_instances
+from pytest_static.parametric import iter_instances
 from pytest_static.parametric import type_handlers
 from tests.util import BASIC_TYPE_EXPECTED_EXAMPLES
 from tests.util import PRODUCT_TYPE_EXPECTED_EXAMPLES
@@ -52,7 +53,7 @@ def test_get_all_possible_type_instances(monkeypatch: MonkeyPatch) -> None:
     ids=lambda typ: f"{typ}",
 )
 def test_iter_instances_with_special_type(typ: Any, expected_len: int) -> None:
-    assert_len(type_handlers.iter_instances(typ), expected_len)
+    assert_len(iter_instances(typ), expected_len)
 
 
 @pytest.mark.parametrize(
@@ -61,7 +62,7 @@ def test_iter_instances_with_special_type(typ: Any, expected_len: int) -> None:
     ids=lambda typ: f"{typ}",
 )
 def test_iter_instances_with_basic_type(typ: Any, expected_len: int) -> None:
-    assert_len(type_handlers.iter_instances(typ), expected_len)
+    assert_len(iter_instances(typ), expected_len)
 
 
 @pytest.mark.parametrize(
@@ -70,7 +71,7 @@ def test_iter_instances_with_basic_type(typ: Any, expected_len: int) -> None:
     ids=lambda typ: f"{typ}",
 )
 def test_iter_instances_with_basic_sum_type(typ: Any, expected_len: int) -> None:
-    assert_len(type_handlers.iter_instances(typ), expected_len)
+    assert_len(iter_instances(typ), expected_len)
 
 
 @pytest.mark.parametrize(
@@ -79,7 +80,7 @@ def test_iter_instances_with_basic_sum_type(typ: Any, expected_len: int) -> None
     ids=lambda typ: f"{typ}",
 )
 def test_iter_instances_with_product_type(typ: Any, expected_len: int) -> None:
-    assert_len(type_handlers.iter_instances(typ), expected_len)
+    assert_len(iter_instances(typ), expected_len)
 
 
 @pytest.mark.parametrize(
@@ -90,4 +91,4 @@ def test_iter_instances_with_product_type(typ: Any, expected_len: int) -> None:
 def test_iter_instances_with_missing_generic_type(typ: Any, expected_len: int) -> None:
     assert expected_len == -1
     with pytest.raises(TypeError):
-        assert [*type_handlers.iter_instances(typ)]
+        assert [*iter_instances(typ)]

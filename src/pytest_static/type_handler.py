@@ -4,12 +4,9 @@ from __future__ import annotations
 
 import types
 from dataclasses import MISSING
+from functools import wraps
 from typing import Any
 from typing import Callable
-from typing import Generator
-from typing import Iterable
-
-from typing_extensions import get_args
 
 from pytest_static.custom_typing import TypeHandler
 from pytest_static.util import get_base_type
@@ -23,9 +20,15 @@ class TypeHandlerRegistry:
         self._mapping: dict[Any, list[TypeHandler]] = {}
         self._proxy: types.MappingProxyType[Any, list[TypeHandler]] = types.MappingProxyType(self._mapping)
 
-    def __getitem__(self, __key: Any) -> Any:
-        """Returns from proxy."""
-        return self._proxy.__getitem__(__key)
+    @wraps(types.MappingProxyType.__getitem__)
+    def __getitem__(self, *args: Any, **kwargs: Any) -> Any:
+        """Returns proxies getitem."""
+        return self._proxy.__getitem__(*args, **kwargs)
+
+    @wraps(types.MappingProxyType.get)
+    def get(self, *args: Any, **kwargs: Any) -> Any:
+        """Returns proxies get."""
+        return self._proxy.get(*args, **kwargs)
 
     def register(self, *args: Any) -> Callable[[TypeHandler], TypeHandler]:
         """Returns a decorator that registers a Callback to each of the provided keys.
@@ -54,17 +57,7 @@ class TypeHandlerRegistry:
 
         return decorator
 
-    def get_instances(self, key: Any) -> tuple[Any, ...]:
-        """Returns a tuple of instances retrieved from the registered callbacks."""
-        return tuple(*self.iter_instances(key))
-
-    def iter_instances(self, key: Any) -> Generator[Any, None, None]:
-        """Returns a Generator that yields from all handlers."""
-        base_type: Any = get_base_type(key)
-        type_args: tuple[Any, ...] = get_args(key)
-
-        handlers: Iterable[TypeHandler] | None = self._proxy.get(base_type, None)
-        if handlers is None:
-            raise KeyError(f"Failed to find a handler for {key=}.")
-        for handler in handlers:
-            yield from handler(base_type, type_args)
+    def clear(self, typ: Any) -> None:
+        """Clears all handlers from the provided typ."""
+        if self._mapping.get(typ, None) is not None:
+            self._mapping[typ] = []
