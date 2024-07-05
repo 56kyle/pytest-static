@@ -93,7 +93,7 @@ def iter_instances(key: Any, handler_registry: TypeHandlerRegistry = type_handle
 
 
 @type_handlers.register(type(None))
-def _iter_none_instanes(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+def _iter_none_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
     yield None
 
 
