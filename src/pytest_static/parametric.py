@@ -161,7 +161,7 @@ def _iter_product_instances_with_constructor(
 
 def _validate_combination_length(combination: tuple[Any, ...], expected_length: int, typ: type[Any]) -> None:
     if len(combination) != expected_length:
-        raise TypeError(f"Expected combination of length {expected_length} for " f"type {typ}. Got {len(combination)}")
+        raise TypeError(f"Expected combination of length {expected_length} for type {typ}. Got {len(combination)}")
 
 
 def _iter_custom_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
