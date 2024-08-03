@@ -41,7 +41,7 @@ from pytest_static.util import get_base_type
 
 type_handlers: TypeHandlerRegistry = TypeHandlerRegistry()
 
-JT = TypeVar("JT", bound=int)
+JT = TypeVar("JT")
 
 
 def parametrize_types(
@@ -117,7 +117,7 @@ def _iter_type_var_instances(base_type: Any, type_args: tuple[Any, ...]) -> Gene
     elif base_type.__bound__:
         yield from get_all_possible_type_instances(base_type.__bound__)
     else:
-        raise TypeError(f"Failed to find a binding for instantiating TypeVar {base_type=}.")
+        yield from get_all_possible_type_instances(Any)
 
 
 def _iter_callable_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
