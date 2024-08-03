@@ -11,12 +11,16 @@ from typing import Generator
 from typing import Iterable
 from typing import Optional
 from typing import Sequence
+from typing import TypeVar
 from typing import Union
 from typing import get_args
 
 from _pytest.mark import Mark
 from _pytest.python import Metafunc
 from typing_extensions import Literal
+from typing_extensions import get_protocol_members
+from typing_extensions import get_type_hints
+from typing_extensions import is_protocol
 
 from pytest_static.custom_typing import KT
 from pytest_static.custom_typing import VT
@@ -36,6 +40,8 @@ from pytest_static.util import get_base_type
 
 
 type_handlers: TypeHandlerRegistry = TypeHandlerRegistry()
+
+JT = TypeVar("JT", bound=int)
 
 
 def parametrize_types(
@@ -87,9 +93,49 @@ def iter_instances(key: Any, handler_registry: TypeHandlerRegistry = type_handle
 
     handlers: Iterable[TypeHandler] | None = handler_registry.get(base_type, None)
     if handlers is None:
-        raise KeyError(f"Failed to find a handler for {key=}.")
+        handlers = [_iter_instances_using_fallback]
     for handler in handlers:
         yield from handler(base_type, type_args)
+
+
+def _iter_instances_using_fallback(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    """Returns a Generator that yields from default fallback methods for the given base_type and type_args."""
+    if isinstance(base_type, TypeVar):
+        yield from _iter_type_var_instances(base_type, type_args)
+    elif callable(base_type):
+        yield from _iter_callable_instances(base_type, type_args)
+    elif is_protocol(base_type):
+        yield from _iter_protocol_instances(base_type)
+    else:
+        raise TypeError(f"Failed to find a fallback method for instantiating {base_type=}.")
+
+
+def _iter_type_var_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    if base_type.__constraints__:
+        for constraint in base_type.__constraints__:
+            yield from get_all_possible_type_instances(constraint)
+    elif base_type.__bound__:
+        yield from get_all_possible_type_instances(base_type.__bound__)
+    else:
+        raise TypeError(f"Failed to find a binding for instantiating TypeVar {base_type=}.")
+
+
+def _iter_callable_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    type_hints: dict[str, Any] = get_type_hints(base_type)
+    type_annotations: tuple[Any, ...] = tuple(v for k, v in type_hints.items() if k != "return")
+    yield from _iter_product_instances_with_constructor(base_type, type_annotations, type_constructor=base_type)
+
+
+def _iter_protocol_instances(typ: Any) -> Generator[T, None, None]:
+    class DummyImplementation:
+        pass
+
+    for member in get_protocol_members(typ):
+        if callable(getattr(typ, member)):
+            setattr(DummyImplementation, member, lambda self, *args, **kwargs: None)
+        else:
+            setattr(DummyImplementation, member, None)
+    yield DummyImplementation()
 
 
 @type_handlers.register(type(None))
@@ -135,7 +181,7 @@ def _iter_literal_instances(base_type: Any, type_args: tuple[Any, ...]) -> Gener
 @type_handlers.register(Any)
 def _iter_any_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
     for typ in DEFAULT_INSTANCE_SETS.keys():
-        yield from iter_instances(typ)
+        yield from get_all_possible_type_instances(typ)
 
 
 @type_handlers.register(Union, Optional, Enum)
@@ -145,7 +191,7 @@ def _iter_sum_instances(_: Any, type_args: tuple[Any, ...]) -> Generator[Any, No
 
 
 def _iter_combinations(type_args: tuple[Any, ...]) -> Generator[tuple[Any, ...], None, None]:
-    yield from map(tuple, itertools.product(*map(iter_instances, type_args)))
+    yield from map(tuple, itertools.product(*map(get_all_possible_type_instances, type_args)))
 
 
 def _iter_product_instances_with_constructor(
@@ -156,7 +202,7 @@ def _iter_product_instances_with_constructor(
 ) -> Generator[T_co, None, None]:
     if Ellipsis in type_args:
         type_args = type_args[:-1]
-    yield from map(type_constructor, _iter_combinations(type_args))
+    yield from itertools.starmap(type_constructor, _iter_combinations(type_args))
 
 
 def _validate_combination_length(combination: tuple[Any, ...], expected_length: int, typ: type[Any]) -> None:
