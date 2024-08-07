@@ -210,11 +210,6 @@ def _validate_combination_length(combination: tuple[Any, ...], expected_length: 
         raise TypeError(f"Expected combination of length {expected_length} for type {typ}. Got {len(combination)}")
 
 
-def _iter_custom_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
-    """Planned for future, but not yet implemented."""
-    raise NotImplementedError
-
-
 def _dict_constructor(combination: tuple[KT, VT]) -> dict[KT, VT]:
     _validate_combination_length(combination=combination, expected_length=2, typ=dict)
     return {combination[0]: combination[1]}
