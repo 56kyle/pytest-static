@@ -202,7 +202,7 @@ def _iter_product_instances_with_constructor(
 ) -> Generator[T_co, None, None]:
     if Ellipsis in type_args:
         type_args = type_args[:-1]
-    yield from itertools.starmap(type_constructor, _iter_combinations(type_args))
+    yield from map(type_constructor, _iter_combinations(type_args))
 
 
 def _validate_combination_length(combination: tuple[Any, ...], expected_length: int, typ: type[Any]) -> None:
