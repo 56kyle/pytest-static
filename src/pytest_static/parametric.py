@@ -102,10 +102,10 @@ def _iter_instances_using_fallback(base_type: Any, type_args: tuple[Any, ...]) -
     """Returns a Generator that yields from default fallback methods for the given base_type and type_args."""
     if isinstance(base_type, TypeVar):
         yield from _iter_type_var_instances(base_type, type_args)
+    elif is_protocol(base_type):
+        yield from _iter_protocol_instances(base_type, type_args)
     elif callable(base_type):
         yield from _iter_callable_instances(base_type, type_args)
-    elif is_protocol(base_type):
-        yield from _iter_protocol_instances(base_type)
     else:
         raise TypeError(f"Failed to find a fallback method for instantiating {base_type=}.")
 
