@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 from typing import Dict
 from typing import FrozenSet
+from typing import Generator
 from typing import List
 from typing import Optional
 from typing import Set
@@ -13,6 +14,7 @@ from typing import Union
 from typing import _SpecialGenericAlias  # type: ignore[attr-defined]
 
 from typing_extensions import Literal
+from typing_extensions import Protocol
 from typing_extensions import get_args
 from typing_extensions import get_origin
 
@@ -108,6 +110,17 @@ PRODUCT_TYPE_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
     *PRODUCT_TYPE_SEVERAL_GENERIC_EXPECTED_EXAMPLES,
     *PRODUCT_TYPE_PARAM_SPEC_GENERIC_EXPECTED_EXAMPLES,
 ]
+
+
+DUMMY_TYPE_HANDLER_OUTPUT: tuple[int, ...] = (1, 2, 3)
+
+
+def dummy_type_handler(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    yield from DUMMY_TYPE_HANDLER_OUTPUT
+
+
+class DummyProtocol(Protocol):
+    def foo(self) -> int: ...  # noqa: E704
 
 
 def type_annotation_to_string(annotation: Any) -> str:
