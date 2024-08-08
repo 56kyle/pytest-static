@@ -10,14 +10,19 @@ import pytest
 from _pytest.monkeypatch import MonkeyPatch
 from typing_extensions import ParamSpec
 
+from pytest_static.custom_typing import TypeHandler
 from pytest_static.parametric import _iter_bool_instances
 from pytest_static.parametric import _iter_bytes_instances
+from pytest_static.parametric import _iter_callable_instances
 from pytest_static.parametric import _iter_complex_instances
 from pytest_static.parametric import _iter_float_instances
+from pytest_static.parametric import _iter_instances_using_fallback
 from pytest_static.parametric import _iter_int_instances
 from pytest_static.parametric import _iter_literal_instances
 from pytest_static.parametric import _iter_none_instances
+from pytest_static.parametric import _iter_protocol_instances
 from pytest_static.parametric import _iter_str_instances
+from pytest_static.parametric import _iter_type_var_instances
 from pytest_static.parametric import get_all_possible_type_instances
 from pytest_static.parametric import iter_instances
 from pytest_static.parametric import type_handlers
@@ -27,6 +32,7 @@ from tests.util import BASIC_TYPE_EXPECTED_EXAMPLES
 from tests.util import BOOL_LEN
 from tests.util import BYTES_LEN
 from tests.util import COMPLEX_LEN
+from tests.util import DUMMY_TYPE_HANDLER_OUTPUT
 from tests.util import FLOAT_LEN
 from tests.util import INT_LEN
 from tests.util import NONE_LEN
@@ -35,6 +41,8 @@ from tests.util import PRODUCT_TYPE_MISSING_GENERIC_EXPECTED_EXAMPLES
 from tests.util import SPECIAL_TYPE_EXPECTED_EXAMPLES
 from tests.util import STR_LEN
 from tests.util import SUM_TYPE_EXPECTED_EXAMPLES
+from tests.util import DummyProtocol
+from tests.util import dummy_type_handler
 
 
 NoneType: type[None] = type(None)
@@ -117,6 +125,19 @@ def test_type_handlers(key: Any) -> None:
     from pytest_static.parametric import type_handlers as test_handlers
 
     assert key in test_handlers._proxy
+
+
+@pytest.mark.parametrize(
+    argnames=["typ", "patched_function"],
+    argvalues=[
+        (T, _iter_type_var_instances),
+        (dummy_type_handler, _iter_callable_instances),
+        (DummyProtocol, _iter_protocol_instances),
+    ],
+)
+def test__iter_instances_using_fallback(monkeypatch: MonkeyPatch, typ: Any, patched_function: TypeHandler) -> None:
+    monkeypatch.setattr(f"pytest_static.parametric.{patched_function.__name__}", dummy_type_handler)
+    assert_len(_iter_instances_using_fallback(typ, tuple()), len(DUMMY_TYPE_HANDLER_OUTPUT))
 
 
 def test__iter_none_instances() -> None:
