@@ -126,7 +126,7 @@ def _iter_callable_instances(base_type: Any, type_args: tuple[Any, ...]) -> Gene
     yield from _iter_product_instances_with_constructor(base_type, type_annotations, type_constructor=base_type)
 
 
-def _iter_protocol_instances(typ: Any, type_args: tuple[Any, ...]) -> Generator[T, None, None]:
+def _iter_protocol_instances(typ: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
     class DummyImplementation:
         pass
 
