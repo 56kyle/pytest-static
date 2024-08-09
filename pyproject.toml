@@ -37,6 +37,7 @@ typing-extensions = "^4.9.0"
 Pygments = ">=2.10.0"
 bandit = ">=1.7.4"
 black = ">=21.10b0"
+certifi = ">=2024.7.4"
 coverage = {extras = ["toml"], version = ">=6.2"}
 darglint = ">=1.8.1"
 flake8 = ">=4.0.1"
@@ -63,10 +64,6 @@ pytest-static = "pytest_static.__main__:main"
 
 [tool.poetry.plugins."pytest"]
 pytest-static= "pytest_static.plugin"
-
-
-[tool.poetry.group.dev.dependencies]
-certifi = ">=2024.7.4"
 
 [tool.black]
 line-length = 120
