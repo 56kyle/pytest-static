@@ -19,6 +19,36 @@
 [pre-commit]: https://github.com/pre-commit/pre-commit
 [black]: https://github.com/psf/black
 
+## Overview
+
+pytest-static is a pytest plugin that allows you to parametrize your tests using type annotations.
+
+What this looks like in practice is that you can write a test like this:
+
+```python
+import pytest
+
+
+@pytest.mark.parametrize_types("a", [tuple[bool, bool]])
+def test_a(a: bool) -> None:
+    assert isinstance(a, bool)
+```
+
+Which would be equivalent to the following test
+
+```python
+import pytest
+
+
+@pytest.mark.parametrize("a", [(True, True), (True, False), (False, True), (False, False)])
+def test_a(a: int) -> None:
+    assert isinstance(a, int)
+```
+
+For types such as int, str, etc that have an unlimited amount of values, there are premade sets meant to cover common edge cases that are used by default
+
+These premade sets can be modified or added to using the type_handlers.register decorator, or the type_handlers.clear function.
+
 ## Features
 
 - TODO
