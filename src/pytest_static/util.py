@@ -16,10 +16,6 @@ def get_base_type(typ: Any) -> Any:
     return typ
 
 
-def is_subtype(type_a: Any, type_b: Any) -> bool:
-    """Returns whether an instance of type_a is always an instance of type_b."""
-
-
 def is_none_type(typ: Any) -> bool:
     """Returns whether typ is None."""
     return typ is None

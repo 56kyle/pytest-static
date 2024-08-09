@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import types
 from dataclasses import MISSING
-from functools import wraps
 from typing import Any
 from typing import Callable
 
@@ -20,12 +19,10 @@ class TypeHandlerRegistry:
         self._mapping: dict[Any, list[TypeHandler]] = {}
         self._proxy: types.MappingProxyType[Any, list[TypeHandler]] = types.MappingProxyType(self._mapping)
 
-    @wraps(types.MappingProxyType.__getitem__)
     def __getitem__(self, *args: Any, **kwargs: Any) -> Any:
         """Returns proxies getitem."""
         return self._proxy.__getitem__(*args, **kwargs)
 
-    @wraps(types.MappingProxyType.get)
     def get(self, *args: Any, **kwargs: Any) -> Any:
         """Returns proxies get."""
         return self._proxy.get(*args, **kwargs)
