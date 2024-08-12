@@ -14,6 +14,7 @@ from pytest_static.custom_typing import TypeHandler
 from pytest_static.parametric import _iter_bool_instances
 from pytest_static.parametric import _iter_bytes_instances
 from pytest_static.parametric import _iter_callable_instances
+from pytest_static.parametric import _iter_combinations
 from pytest_static.parametric import _iter_complex_instances
 from pytest_static.parametric import _iter_float_instances
 from pytest_static.parametric import _iter_instances_using_fallback
@@ -138,6 +139,19 @@ def test_type_handlers(key: Any) -> None:
 def test__iter_instances_using_fallback(monkeypatch: MonkeyPatch, typ: Any, patched_function: TypeHandler) -> None:
     monkeypatch.setattr(f"pytest_static.parametric.{patched_function.__name__}", dummy_type_handler)
     assert_len(_iter_instances_using_fallback(typ, tuple()), len(DUMMY_TYPE_HANDLER_OUTPUT))
+
+
+@pytest.mark.parametrize(
+    argnames=["type_args", "expected_len"],
+    argvalues=[
+        ((int,), INT_LEN),
+        ((int, str), INT_LEN * STR_LEN),
+        ((int, str, float), INT_LEN * STR_LEN * FLOAT_LEN),
+    ],
+)
+def test__iter_combinations(type_args: tuple[Any, ...], expected_len: int) -> None:
+    combinations: list[tuple[Any, ...]] = list(_iter_combinations(type_args))
+    assert_len(combinations, expected_len)
 
 
 def test__iter_none_instances() -> None:

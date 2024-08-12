@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import itertools
+from dataclasses import dataclass
 from enum import Enum
 from functools import partial
 from typing import Any
@@ -191,7 +192,7 @@ def _iter_sum_instances(_: Any, type_args: tuple[Any, ...]) -> Generator[Any, No
 
 
 def _iter_combinations(type_args: tuple[Any, ...]) -> Generator[tuple[Any, ...], None, None]:
-    yield from map(tuple, itertools.product(*map(get_all_possible_type_instances, type_args)))
+    yield from itertools.product(*map(get_all_possible_type_instances, type_args))
 
 
 def _iter_product_instances_with_constructor(
@@ -202,7 +203,7 @@ def _iter_product_instances_with_constructor(
 ) -> Generator[T_co, None, None]:
     if Ellipsis in type_args:
         type_args = type_args[:-1]
-    yield from map(type_constructor, _iter_combinations(type_args))
+    yield from itertools.starmap(type_constructor, _iter_combinations(type_args))
 
 
 def _validate_combination_length(combination: tuple[Any, ...], expected_length: int, typ: type[Any]) -> None:
@@ -210,28 +211,27 @@ def _validate_combination_length(combination: tuple[Any, ...], expected_length: 
         raise TypeError(f"Expected combination of length {expected_length} for type {typ}. Got {len(combination)}")
 
 
-def _dict_constructor(combination: tuple[KT, VT]) -> dict[KT, VT]:
-    _validate_combination_length(combination=combination, expected_length=2, typ=dict)
-    return {combination[0]: combination[1]}
+def _dict_constructor(k: KT, v: VT) -> dict[KT, VT]:
+    return {k: v}
 
 
-def _list_constructor(combination: tuple[T]) -> list[T]:
-    _validate_combination_length(combination=combination, expected_length=1, typ=list)
-    return list(combination)
+def _list_constructor(value: T) -> list[T]:
+    return [value]
 
 
-def _set_constructor(combination: tuple[T]) -> set[T]:
-    _validate_combination_length(combination=combination, expected_length=1, typ=set)
-    return set(combination)
+def _set_constructor(value: T) -> set[T]:
+    _validate_combination_length(combination=(value,), expected_length=1, typ=set)
+    return {value}
 
 
-def _frozenset_constructor(combination: tuple[T]) -> frozenset[T]:
-    _validate_combination_length(combination=combination, expected_length=1, typ=frozenset)
-    return frozenset(combination)
+def _frozenset_constructor(*args: Any) -> frozenset[Any]:
+    _validate_combination_length(combination=args, expected_length=1, typ=frozenset)
+    return frozenset(args)
 
 
-def _tuple_constructor(combination: T) -> T:
-    return combination
+def _tuple_constructor(*args: Any) -> tuple[Any, ...]:
+    return tuple(args)
+
 
 
 _iter_dict_instances: partial[Generator[Any, None, None]] = partial(
