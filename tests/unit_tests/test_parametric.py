@@ -29,6 +29,7 @@ from pytest_static.parametric import iter_instances
 from pytest_static.parametric import type_handlers
 from pytest_static.type_sets import DEFAULT_INSTANCE_SETS
 from pytest_static.type_sets import INT_PARAMS
+from tests.util import ANY_LEN
 from tests.util import BASIC_TYPE_EXPECTED_EXAMPLES
 from tests.util import BOOL_LEN
 from tests.util import BYTES_LEN
@@ -45,12 +46,16 @@ from tests.util import SUM_TYPE_EXPECTED_EXAMPLES
 from tests.util import DummyProtocol
 from tests.util import dummy_type_handler
 
-
 NoneType: type[None] = type(None)
 
 
 T = TypeVar("T", bound=Any)
 P = ParamSpec("P")
+
+
+T_temp_constrained = TypeVar("T_temp_constrained", int, str)
+T_temp_bound = TypeVar("T_temp_bound", bound=int)
+T_temp_any = TypeVar("T_temp_any")
 
 
 class DummyClassNoArgs:
@@ -63,6 +68,11 @@ def dummy_iter_instances(typ: Any) -> Generator[Any, None, None]:
 
 def assert_len(iterable: Iterable[Any], expected: int) -> None:
     assert len([*iterable]) == expected
+
+
+def test_module_level_registrations() -> None:
+    from pytest_static.parametric import type_handlers as test_type_handlers
+    assert len(test_type_handlers._mapping) > len(BASIC_TYPE_EXPECTED_EXAMPLES)
 
 
 def test_get_all_possible_type_instances(monkeypatch: MonkeyPatch) -> None:
@@ -139,6 +149,28 @@ def test_type_handlers(key: Any) -> None:
 def test__iter_instances_using_fallback(monkeypatch: MonkeyPatch, typ: Any, patched_function: TypeHandler) -> None:
     monkeypatch.setattr(f"pytest_static.parametric.{patched_function.__name__}", dummy_type_handler)
     assert_len(_iter_instances_using_fallback(typ, tuple()), len(DUMMY_TYPE_HANDLER_OUTPUT))
+
+
+def test__iter_instances_using_fallback_with_invalid() -> None:
+    with pytest.raises(TypeError):
+        assert [*_iter_instances_using_fallback(NoneType)]
+
+
+@pytest.mark.parametrize(
+    argnames=["base_type", "type_args", "expected_len"],
+    argvalues=[
+        (T_temp_constrained, tuple(), INT_LEN + STR_LEN),
+        (T_temp_bound, tuple(), INT_LEN),
+        (T_temp_any, tuple(), ANY_LEN),
+    ],
+)
+def test__iter_type_var_instances(base_type: Any, type_args: tuple[Any, ...], expected_len: int) -> None:
+    assert len([*_iter_type_var_instances(base_type, type_args)]) == expected_len
+
+
+def test__iter_callable_instances() -> None:
+    assert_len(_iter_callable_instances(dummy_iter_instances, tuple()), ANY_LEN)
+
 
 
 @pytest.mark.parametrize(

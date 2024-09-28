@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import itertools
-from dataclasses import dataclass
 from enum import Enum
 from functools import partial
 from typing import Any

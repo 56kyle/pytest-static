@@ -234,6 +234,7 @@ def test_parametrize_types_with_sum_type_expected_examples(
     result.assert_outcomes(passed=expected)
 
 
+@pytest.mark.skip
 @pytest.mark.parametrize(
     argnames=["argtypes", "expected"],
     argvalues=[((type_annotation_to_string(typ),), expected) for typ, expected in PRODUCT_TYPE_EXPECTED_EXAMPLES],

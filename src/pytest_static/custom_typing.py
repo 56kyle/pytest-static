@@ -37,7 +37,7 @@ VT = TypeVar("VT")
 
 T_co = TypeVar("T_co", covariant=True)
 
-P = ParamSpec("P")
+P: ParamSpec = ParamSpec("P")
 
 
 class Missing:
