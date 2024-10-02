@@ -1,7 +1,3 @@
-from dataclasses import dataclass
-from typing import Any
-from typing import Generator
-
 import pytest
 
 from pytest_static.custom_typing import TypeHandler
