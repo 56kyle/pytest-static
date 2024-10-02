@@ -46,6 +46,7 @@ from tests.util import SUM_TYPE_EXPECTED_EXAMPLES
 from tests.util import DummyProtocol
 from tests.util import dummy_type_handler
 
+
 NoneType: type[None] = type(None)
 
 
@@ -72,6 +73,7 @@ def assert_len(iterable: Iterable[Any], expected: int) -> None:
 
 def test_module_level_registrations() -> None:
     from pytest_static.parametric import type_handlers as test_type_handlers
+
     assert len(test_type_handlers._mapping) > len(BASIC_TYPE_EXPECTED_EXAMPLES)
 
 
@@ -153,7 +155,7 @@ def test__iter_instances_using_fallback(monkeypatch: MonkeyPatch, typ: Any, patc
 
 def test__iter_instances_using_fallback_with_invalid() -> None:
     with pytest.raises(TypeError):
-        assert [*_iter_instances_using_fallback(NoneType)]
+        assert [*_iter_instances_using_fallback(42, tuple())]
 
 
 @pytest.mark.parametrize(
@@ -170,7 +172,6 @@ def test__iter_type_var_instances(base_type: Any, type_args: tuple[Any, ...], ex
 
 def test__iter_callable_instances() -> None:
     assert_len(_iter_callable_instances(dummy_iter_instances, tuple()), ANY_LEN)
-
 
 
 @pytest.mark.parametrize(
