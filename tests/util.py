@@ -89,10 +89,10 @@ PRODUCT_TYPE_DOUBLE_GENERIC_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
 
 
 PRODUCT_TYPE_SEVERAL_GENERIC_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
-    (Tuple[bool, int, str], BOOL_LEN * INT_LEN * STR_LEN),
-    (Tuple[Union[bool, int], int, Union[bool, str]], (BOOL_LEN + INT_LEN) * INT_LEN * (BOOL_LEN + STR_LEN)),
-    (tuple[bool, int, str], BOOL_LEN * INT_LEN * STR_LEN),
-    (tuple[Union[bool, int], int, Union[bool, str]], (BOOL_LEN + INT_LEN) * INT_LEN * (BOOL_LEN + STR_LEN)),
+    (Tuple[bool, int, float], BOOL_LEN * INT_LEN * FLOAT_LEN),
+    (Tuple[Union[bool, int], int, Union[bool, int]], (BOOL_LEN + INT_LEN) * INT_LEN * (BOOL_LEN + INT_LEN)),
+    (tuple[bool, int, float], BOOL_LEN * INT_LEN * FLOAT_LEN),
+    (tuple[Union[bool, int], int, Union[bool, int]], (BOOL_LEN + INT_LEN) * INT_LEN * (BOOL_LEN + INT_LEN)),
 ]
 
 

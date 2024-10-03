@@ -18,7 +18,6 @@ from typing import get_args
 from _pytest.mark import Mark
 from _pytest.python import Metafunc
 from typing_extensions import Literal
-from typing_extensions import get_protocol_members
 from typing_extensions import get_type_hints
 from typing_extensions import is_protocol
 
@@ -127,15 +126,7 @@ def _iter_callable_instances(base_type: Any, type_args: tuple[Any, ...]) -> Gene
 
 
 def _iter_protocol_instances(typ: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
-    class DummyImplementation:
-        pass
-
-    for member in get_protocol_members(typ):
-        if callable(getattr(typ, member)):
-            setattr(DummyImplementation, member, lambda self, *args, **kwargs: None)
-        else:
-            setattr(DummyImplementation, member, None)
-    yield DummyImplementation()
+    raise NotImplementedError
 
 
 @type_handlers.register(type(None))  # pragma: no cover

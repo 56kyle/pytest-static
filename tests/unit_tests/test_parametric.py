@@ -9,6 +9,7 @@ from typing import TypeVar
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
 from typing_extensions import ParamSpec
+from typing_extensions import Protocol
 
 from pytest_static.custom_typing import TypeHandler
 from pytest_static.parametric import _iter_bool_instances
@@ -167,7 +168,16 @@ def test__iter_instances_using_fallback_with_invalid() -> None:
     ],
 )
 def test__iter_type_var_instances(base_type: Any, type_args: tuple[Any, ...], expected_len: int) -> None:
-    assert len([*_iter_type_var_instances(base_type, type_args)]) == expected_len
+    assert_len(_iter_type_var_instances(base_type, type_args), expected_len)
+
+
+def test__iter_protocol_instances() -> None:
+    class DummyProtocol(Protocol):
+        def dummy_method(self, x: int) -> None:
+            ...
+
+    with pytest.raises(NotImplementedError):
+        _iter_protocol_instances(DummyProtocol, tuple())
 
 
 def test__iter_callable_instances() -> None:
