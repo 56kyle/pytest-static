@@ -67,10 +67,19 @@ jobs:
           pipx inject --pip-args=--constraint=${{ github.workspace }}/.github/workflows/constraints.txt nox nox-poetry
           nox --version
 
-      - name: Build and Install Rust Packages
-      - uses: PyO3/maturin-action@v1
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
         with:
-          command: develop
+          toolchain: stable
+          override: true
+
+      - name: Install Maturin
+        run: |
+          cargo install maturin
+
+      - name: Build Python extension with Maturin
+        run: |
+          maturin develop
 
       - name: Compute pre-commit cache key
         if: matrix.session == 'pre-commit'
@@ -142,10 +151,19 @@ jobs:
           pipx inject --pip-args=--constraint=${{ github.workspace }}/.github/workflows/constraints.txt nox nox-poetry
           nox --version
 
-      - name: Build and Install Rust Packages
-      - uses: PyO3/maturin-action@v1
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
         with:
-          command: develop
+          toolchain: ${{ matrix.rust-toolchain }}
+          override: true
+
+      - name: Install Maturin
+        run: |
+          cargo install maturin
+
+      - name: Build Python extension with Maturin
+        run: |
+          maturin develop
 
       - name: Download coverage data
         uses: actions/download-artifact@v3
