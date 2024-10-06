@@ -138,6 +138,20 @@ jobs:
           pipx inject --pip-args=--constraint=${{ github.workspace }}/.github/workflows/constraints.txt nox nox-poetry
           nox --version
 
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust-toolchain }}
+          override: true
+
+      - name: Install Maturin
+        run: |
+          cargo install maturin
+
+      - name: Build Python extension with Maturin
+        run: |
+          maturin develop
+
       - name: Download coverage data
         uses: actions/download-artifact@v3
         with:
