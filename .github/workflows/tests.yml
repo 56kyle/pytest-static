@@ -77,10 +77,6 @@ jobs:
         run: |
           cargo install maturin
 
-      - name: Build Python extension with Maturin
-        run: |
-          maturin develop
-
       - name: Compute pre-commit cache key
         if: matrix.session == 'pre-commit'
         id: pre-commit-cache
@@ -160,10 +156,6 @@ jobs:
       - name: Install Maturin
         run: |
           cargo install maturin
-
-      - name: Build Python extension with Maturin
-        run: |
-          maturin develop
 
       - name: Download coverage data
         uses: actions/download-artifact@v3
