@@ -157,9 +157,6 @@ def mypy(session: Session) -> None:
 @session(python=python_versions)
 def tests(session: Session) -> None:
     """Run the test suite."""
-    session.install("maturin")
-    session.run("maturin", "develop")
-
     session.install(".")
     session.install("coverage[toml]", "pytest", "pygments")
     try:
@@ -199,6 +196,7 @@ def xdoctest(session: Session) -> None:
         args = [f"--modname={package}", "--command=all"]
         if "FORCE_COLOR" in os.environ:
             args.append("--colored=1")
+
     session.install(".")
     session.install("xdoctest[colors]")
     session.run("python", "-m", "xdoctest", *args)
@@ -210,6 +208,7 @@ def docs_build(session: Session) -> None:
     args = session.posargs or ["docs", "docs/_build"]
     if not session.posargs and "FORCE_COLOR" in os.environ:
         args.insert(0, "--color")
+
     session.install(".")
     session.install("sphinx", "sphinx-click", "furo", "myst-parser")
 
