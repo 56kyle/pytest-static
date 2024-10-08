@@ -148,6 +148,9 @@ def mypy(session: Session) -> None:
     """Type-check using mypy."""
     args = session.posargs or ["src", "tests", "docs/conf.py"]
     session.install(".")
+    session.install("maturin")
+    session.install("develop")
+
     session.install("mypy", "pytest")
     session.run("mypy", *args)
     if not session.posargs:
