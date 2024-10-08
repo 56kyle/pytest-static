@@ -65,7 +65,9 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          components: ["rustfmt", "clippy"]
+          components:
+            - rustfmt
+            - clippy
 
       - name: Install Maturin
         run: |
@@ -150,7 +152,9 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          components: ["rustfmt", "clippy"]
+          components:
+            - rustfmt
+            - clippy
 
       - name: Install Maturin
         run: |
