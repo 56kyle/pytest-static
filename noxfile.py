@@ -158,6 +158,9 @@ def mypy(session: Session) -> None:
 def tests(session: Session) -> None:
     """Run the test suite."""
     session.install(".")
+    session.install("maturin")
+    session.run("maturin", "develop")
+
     session.install("coverage[toml]", "pytest", "pygments")
     try:
         session.run("coverage", "run", "--parallel", "-m", "pytest", *session.posargs)
