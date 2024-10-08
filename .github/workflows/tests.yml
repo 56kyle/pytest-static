@@ -61,17 +61,11 @@ jobs:
           pipx install --pip-args=--constraint=${{ github.workspace }}/.github/workflows/constraints.txt poetry
           poetry --version
 
-      - name: Install Nox
-        run: |
-          pipx install --pip-args=--constraint=${{ github.workspace }}/.github/workflows/constraints.txt nox
-          pipx inject --pip-args=--constraint=${{ github.workspace }}/.github/workflows/constraints.txt nox nox-poetry
-          nox --version
-
-      - name: Set up Rust
+      - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          override: true
+          components: ["rustfmt", "clippy"]
 
       - name: Install Maturin
         run: |
@@ -80,6 +74,12 @@ jobs:
       - name: Build Python extension with Maturin
         run: |
           maturin develop
+
+      - name: Install Nox
+        run: |
+          pipx install --pip-args=--constraint=${{ github.workspace }}/.github/workflows/constraints.txt nox
+          pipx inject --pip-args=--constraint=${{ github.workspace }}/.github/workflows/constraints.txt nox nox-poetry
+          nox --version
 
       - name: Compute pre-commit cache key
         if: matrix.session == 'pre-commit'
@@ -146,17 +146,11 @@ jobs:
           pipx install --pip-args=--constraint=${{ github.workspace }}/.github/workflows/constraints.txt poetry
           poetry --version
 
-      - name: Install Nox
-        run: |
-          pipx install --pip-args=--constraint=${{ github.workspace }}/.github/workflows/constraints.txt nox
-          pipx inject --pip-args=--constraint=${{ github.workspace }}/.github/workflows/constraints.txt nox nox-poetry
-          nox --version
-
-      - name: Set up Rust
+      - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ matrix.rust-toolchain }}
-          override: true
+          toolchain: stable
+          components: ["rustfmt", "clippy"]
 
       - name: Install Maturin
         run: |
@@ -165,6 +159,12 @@ jobs:
       - name: Build Python extension with Maturin
         run: |
           maturin develop
+
+      - name: Install Nox
+        run: |
+          pipx install --pip-args=--constraint=${{ github.workspace }}/.github/workflows/constraints.txt nox
+          pipx inject --pip-args=--constraint=${{ github.workspace }}/.github/workflows/constraints.txt nox nox-poetry
+          nox --version
 
       - name: Download coverage data
         uses: actions/download-artifact@v3
