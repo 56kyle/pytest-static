@@ -75,7 +75,7 @@ jobs:
 
       - name: Install Maturin
         run: |
-          cargo install maturin
+          pipx install --pip-args=--constraint=${{ github.workspace }}/.github/workflows/constraints.txt maturin
 
       - name: Build Python extension with Maturin
         run: |
@@ -159,7 +159,7 @@ jobs:
 
       - name: Install Maturin
         run: |
-          cargo install maturin
+          pipx install --pip-args=--constraint=${{ github.workspace }}/.github/workflows/constraints.txt maturin
 
       - name: Build Python extension with Maturin
         run: |
