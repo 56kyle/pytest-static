@@ -76,10 +76,7 @@ jobs:
       - name: Install Maturin
         run: |
           pipx install --pip-args=--constraint=${{ github.workspace }}/.github/workflows/constraints.txt maturin
-
-      - name: Build Python extension with Maturin
-        run: |
-          maturin develop
+          maturin --version
 
       - name: Compute pre-commit cache key
         if: matrix.session == 'pre-commit'
