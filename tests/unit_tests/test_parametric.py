@@ -64,8 +64,8 @@ class DummyClassNoArgs:
     pass
 
 
-def dummy_iter_instances(typ: Any) -> Generator[Any, None, None]:
-    yield from (1, 2, 3)
+def dummy_callable(typ: Any) -> str:
+    return str(typ)
 
 
 def assert_len(iterable: Iterable[Any], expected: int) -> None:
@@ -181,7 +181,7 @@ def test__iter_protocol_instances() -> None:
 
 
 def test__iter_callable_instances() -> None:
-    assert_len(_iter_callable_instances(dummy_iter_instances, tuple()), ANY_LEN)
+    assert_len(_iter_callable_instances(dummy_callable, tuple()), ANY_LEN)
 
 
 @pytest.mark.parametrize(
