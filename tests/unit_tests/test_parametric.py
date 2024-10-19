@@ -172,12 +172,12 @@ def test__iter_type_var_instances(base_type: Any, type_args: tuple[Any, ...], ex
 
 
 def test__iter_protocol_instances() -> None:
-    class DummyProtocol(Protocol):
+    class DummyProtocolB(Protocol):
         def dummy_method(self, x: int) -> None:
             ...
 
     with pytest.raises(NotImplementedError):
-        _iter_protocol_instances(DummyProtocol, tuple())
+        _iter_protocol_instances(DummyProtocolB, tuple())
 
 
 def test__iter_callable_instances() -> None:
