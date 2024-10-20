@@ -173,8 +173,7 @@ def test__iter_type_var_instances(base_type: Any, type_args: tuple[Any, ...], ex
 
 def test__iter_protocol_instances() -> None:
     class DummyProtocolB(Protocol):
-        def dummy_method(self, x: int) -> None:
-            ...  # pragma: no cover
+        def dummy_method(self, x: int) -> None: ...  # pragma: no cover  # noqa: E704
 
     with pytest.raises(NotImplementedError):
         _iter_protocol_instances(DummyProtocolB, tuple())
