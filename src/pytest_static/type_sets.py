@@ -1,222 +1,151 @@
 """Default type sets for pytest_static to use in parametrization."""
 
+import string
+from types import MappingProxyType
 from typing import Any
-from typing import Dict
-from typing import Set
+from typing import Mapping
 from typing import TypeVar
 
 
 T = TypeVar("T", bound=Any)
 
 
-BoolParams: Set[bool] = {True, False}
+BOOL_PARAMS: frozenset[bool] = frozenset({True, False})
 
-IntParams: Set[int] = {
-    0,
-    1,
-    -1,
-    2,
-    -2,
-    2147483647,
-    -2147483648,
-    9223372036854775807,
-    -9223372036854775808,
-}
+INT_PARAMS: frozenset[int] = frozenset(
+    {
+        0,
+        1,
+        -1,
+        2,
+        -2,
+        2147483647,
+        -2147483648,
+        9223372036854775807,
+        -9223372036854775808,
+    }
+)
 
-Whitespace: Set[str] = {" ", "\t", "\n", "\r", "\v", "\f"}
-SpecialChars: Set[str] = {
-    "!",
-    "@",
-    "#",
-    "$",
-    "%",
-    "^",
-    "&",
-    "*",
-    "(",
-    ")",
-    "-",
-    "+",
-    "=",
-    "{",
-    "}",
-    "[",
-    "]",
-    "|",
-    "\\",
-    ";",
-    ":",
-    "'",
-    '"',
-    ",",
-    "<",
-    ".",
-    ">",
-    "/",
-    "?",
-    "`",
-    "~",
-}
-Digits: Set[str] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
-LowercaseLetters: Set[str] = {
-    "a",
-    "b",
-    "c",
-    "d",
-    "e",
-    "f",
-    "g",
-    "h",
-    "i",
-    "j",
-    "k",
-    "l",
-    "m",
-    "n",
-    "o",
-    "p",
-    "q",
-    "r",
-    "s",
-    "t",
-    "u",
-    "v",
-    "w",
-    "x",
-    "y",
-    "z",
-}
-UppercaseLetters: Set[str] = {
-    "A",
-    "B",
-    "C",
-    "D",
-    "E",
-    "F",
-    "G",
-    "H",
-    "I",
-    "J",
-    "K",
-    "L",
-    "M",
-    "N",
-    "O",
-    "P",
-    "Q",
-    "R",
-    "S",
-    "T",
-    "U",
-    "V",
-    "W",
-    "X",
-    "Y",
-    "Z",
-}
-UnicodeChars: Set[str] = {
-    "\u00E9",
-    "\u00F1",
-    "\u2603",
-    "\u00A9",
-    "\u00AE",
-    "\U0001F600",
-}
-ForeignChars: Set[str] = {"Д", "д", "ב", "ע", "α", "Ω", "い", "ろ", "は", "我", "们"}
-EscapeSequences: Set[str] = {
-    "\\\\",
-    "\\'",
-    '\\"',
-    "\\n",
-    "\\r",
-    "\\t",
-    "\\x00",
-    "\\x7F",
-}
-TripleQuotes: Set[str] = {'"""', "'''"}
+WHITESPACE: frozenset[str] = frozenset(string.whitespace)
+PUNCTUATION: frozenset[str] = frozenset(string.punctuation)
+DIGITS: frozenset[str] = frozenset(string.digits)
+LOWERCASE_LETTERS: frozenset[str] = frozenset(string.ascii_lowercase)
+UPPERCASE_LETTERS: frozenset[str] = frozenset(string.ascii_uppercase)
+UNICODE_CHARS: frozenset[str] = frozenset(
+    {
+        "\u00E9",
+        "\u00F1",
+        "\u2603",
+        "\u00A9",
+        "\u00AE",
+        "\U0001F600",
+    }
+)
+FOREIGN_CHARS: frozenset[str] = frozenset({"Д", "д", "ב", "ע", "α", "Ω", "い", "ろ", "は", "我", "们"})
+ESCAPE_SEQUENCES: frozenset[str] = frozenset(
+    {
+        "\\\\",
+        "\\'",
+        '\\"',
+        "\\n",
+        "\\r",
+        "\\t",
+        "\\x00",
+        "\\x7F",
+    }
+)
+TRIPLE_QUOTES: frozenset[str] = frozenset({'"""', "'''"})
 
-StrParams: Set[str] = {
-    "",
-    *Whitespace,
-    *SpecialChars,
-    *Digits,
-    *LowercaseLetters,
-    *UppercaseLetters,
-    *UnicodeChars,
-    *ForeignChars,
-    *EscapeSequences,
-    *TripleQuotes,
-}
+STR_PARAMS: frozenset[str] = frozenset(
+    {
+        "",
+        *WHITESPACE,
+        *PUNCTUATION,
+        *DIGITS,
+        *LOWERCASE_LETTERS,
+        *UPPERCASE_LETTERS,
+        *UNICODE_CHARS,
+        *FOREIGN_CHARS,
+        *ESCAPE_SEQUENCES,
+        *TRIPLE_QUOTES,
+    }
+)
 
-FloatParams: Set[float] = {
-    0.0,
-    -0.0,
-    1.0,
-    -1.0,
-    1e-10,
-    -1e-10,
-    1e10,
-    -1e10,
-    float("inf"),
-    -float("inf"),
-    float("nan"),
-}
+FLOAT_PARAMS: frozenset[float] = frozenset(
+    {
+        0.0,
+        -0.0,
+        1.0,
+        -1.0,
+        1e-10,
+        -1e-10,
+        1e10,
+        -1e10,
+        float("inf"),
+        -float("inf"),
+        float("nan"),
+    }
+)
 
-ComplexParams: Set[complex] = {
-    0j,
-    1j,
-    -1j,
-    1 + 1j,
-    -1 - 1j,
-    1e-10j,
-    -1e-10j,
-    1e10j,
-    -1e10j,
-    (1e-10 + 1e-10j),
-    (-1e-10 - 1e-10j),
-    (1e10 + 1e10j),
-    (-1e10 - 1e10j),
-}
+COMPLEX_PARAMS: frozenset[complex] = frozenset(
+    {
+        0j,
+        1j,
+        -1j,
+        1 + 1j,
+        -1 - 1j,
+        1e-10j,
+        -1e-10j,
+        1e10j,
+        -1e10j,
+        (1e-10 + 1e-10j),
+        (-1e-10 - 1e-10j),
+        (1e10 + 1e10j),
+        (-1e10 - 1e10j),
+    }
+)
 
-BytesParams: Set[bytes] = {
-    b"",
-    b"\x00",
-    b"\xFF",
-    b"\x00\xFF",
-    b"\xFF\x00",
-    b" ",
-    b"\t",
-    b"\n",
-    b"\r",
-    b"\v",
-    b"\f",
-    b"0",
-    b"1",
-    b"2",
-    b"3",
-    b"4",
-    b"5",
-    b"6",
-    b"7",
-    b"8",
-    b"9",
-    b"a",
-    b"A",
-    b"z",
-    b"Z",
-    b"\x80",
-    b"\xFE",
-}
+BYTES_PARAMS: frozenset[bytes] = frozenset(
+    {
+        b"",
+        b"\x00",
+        b"\xFF",
+        b"\x00\xFF",
+        b"\xFF\x00",
+        b" ",
+        b"\t",
+        b"\n",
+        b"\r",
+        b"\v",
+        b"\f",
+        b"0",
+        b"1",
+        b"2",
+        b"3",
+        b"4",
+        b"5",
+        b"6",
+        b"7",
+        b"8",
+        b"9",
+        b"a",
+        b"A",
+        b"z",
+        b"Z",
+        b"\x80",
+        b"\xFE",
+    }
+)
 
 
-PREDEFINED_INSTANCE_SETS: Dict[Any, Set[Any]] = {
-    bool: BoolParams,
-    int: IntParams,
-    float: FloatParams,
-    complex: ComplexParams,
-    str: StrParams,
-    bytes: BytesParams,
+_default_instance_sets: dict[Any, set[Any]] = {
+    bool: set(BOOL_PARAMS),
+    int: set(INT_PARAMS),
+    float: set(FLOAT_PARAMS),
+    complex: set(COMPLEX_PARAMS),
+    str: set(STR_PARAMS),
+    bytes: set(BYTES_PARAMS),
     type(None): {None},
-    ...: set(),
-    Ellipsis: set(),
 }
+
+DEFAULT_INSTANCE_SETS: Mapping[Any, set[Any]] = MappingProxyType(_default_instance_sets)

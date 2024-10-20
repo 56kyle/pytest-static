@@ -9,12 +9,12 @@ from _pytest.fixtures import FixtureRequest
 from _pytest.pytester import Pytester
 
 from pytest_static.plugin import pytest_configure
-from pytest_static.type_sets import BoolParams
-from pytest_static.type_sets import BytesParams
-from pytest_static.type_sets import ComplexParams
-from pytest_static.type_sets import FloatParams
-from pytest_static.type_sets import IntParams
-from pytest_static.type_sets import StrParams
+from pytest_static.type_sets import BOOL_PARAMS
+from pytest_static.type_sets import BYTES_PARAMS
+from pytest_static.type_sets import COMPLEX_PARAMS
+from pytest_static.type_sets import FLOAT_PARAMS
+from pytest_static.type_sets import INT_PARAMS
+from pytest_static.type_sets import STR_PARAMS
 from tests.util import BASIC_TYPE_EXPECTED_EXAMPLES
 from tests.util import PRODUCT_TYPE_EXPECTED_EXAMPLES
 from tests.util import SPECIAL_TYPE_EXPECTED_EXAMPLES
@@ -125,12 +125,12 @@ def test_parametrize_types_with_argnames_as_string(pytester: Pytester, conftest:
 @pytest.mark.parametrize(
     argnames=["argtypes", "expected"],
     argvalues=[
-        (("bool",), len(BoolParams)),
-        (("int",), len(IntParams)),
-        (("float",), len(FloatParams)),
-        (("complex",), len(ComplexParams)),
-        (("str",), len(StrParams)),
-        (("bytes",), len(BytesParams)),
+        (("bool",), len(BOOL_PARAMS)),
+        (("int",), len(INT_PARAMS)),
+        (("float",), len(FLOAT_PARAMS)),
+        (("complex",), len(COMPLEX_PARAMS)),
+        (("str",), len(STR_PARAMS)),
+        (("bytes",), len(BYTES_PARAMS)),
     ],
     ids=lambda x: str(x) if isinstance(x, Iterable) else x,
     indirect=["argtypes"],
@@ -143,7 +143,7 @@ def test_parametrize_types_with_single_basic(pytester: Pytester, parametrize_typ
 @pytest.mark.parametrize(
     argnames=["argtypes", "expected"],
     argvalues=[
-        (("bool", "int"), len(BoolParams) * len(IntParams)),
+        (("bool", "int"), len(BOOL_PARAMS) * len(INT_PARAMS)),
     ],
     ids=lambda x: str(x) if isinstance(x, Iterable) else x,
     indirect=["argtypes"],
@@ -156,11 +156,11 @@ def test_parametrize_types_with_multiple_basic(pytester: Pytester, parametrize_t
 @pytest.mark.parametrize(
     argnames=["argtypes", "expected"],
     argvalues=[
-        (("List[int]",), len(IntParams)),
-        (("List[str]",), len(StrParams)),
-        (("Dict[bool, int]",), len(BoolParams) * len(IntParams)),
-        (("Dict[str, bool]",), len(StrParams) * len(BoolParams)),
-        (("Tuple[int, str]",), len(IntParams) * len(StrParams)),
+        (("List[int]",), len(INT_PARAMS)),
+        (("List[str]",), len(STR_PARAMS)),
+        (("Dict[bool, int]",), len(BOOL_PARAMS) * len(INT_PARAMS)),
+        (("Dict[str, bool]",), len(STR_PARAMS) * len(BOOL_PARAMS)),
+        (("Tuple[int, str]",), len(INT_PARAMS) * len(STR_PARAMS)),
     ],
     ids=lambda x: str(x) if isinstance(x, Iterable) else x,
     indirect=["argtypes"],
@@ -175,14 +175,14 @@ def test_parametrize_types_with_single_expanded(
 @pytest.mark.parametrize(
     argnames=["argtypes", "expected"],
     argvalues=[
-        (("List[int]", "List[str]"), len(IntParams) * len(StrParams)),
+        (("List[int]", "List[str]"), len(INT_PARAMS) * len(STR_PARAMS)),
         (
             ("List[int]", "Dict[bool, int]"),
-            len(IntParams) * len(BoolParams) * len(IntParams),
+            len(INT_PARAMS) * len(BOOL_PARAMS) * len(INT_PARAMS),
         ),
         (
             ("List[int]", "Dict[str, bool]"),
-            len(IntParams) * len(StrParams) * len(BoolParams),
+            len(INT_PARAMS) * len(STR_PARAMS) * len(BOOL_PARAMS),
         ),
     ],
     ids=lambda x: str(x) if isinstance(x, Iterable) else x,

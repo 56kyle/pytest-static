@@ -3,68 +3,42 @@
 from __future__ import annotations
 
 import itertools
-import sys
-import types
 from enum import Enum
 from functools import partial
 from typing import Any
 from typing import Callable
-from typing import Dict
-from typing import FrozenSet
 from typing import Generator
 from typing import Iterable
-from typing import List
 from typing import Optional
 from typing import Sequence
-from typing import Set
-from typing import Tuple
 from typing import TypeVar
 from typing import Union
 from typing import get_args
-from typing import get_origin
 
 from _pytest.mark import Mark
 from _pytest.python import Metafunc
 from typing_extensions import Literal
-from typing_extensions import ParamSpec
+from typing_extensions import get_type_hints
+from typing_extensions import is_protocol
 
-from pytest_static.type_sets import PREDEFINED_INSTANCE_SETS
-
-
-_UnionGenericAlias = type(Union)
-_LiteralSpecialForm = type(Literal)
-
-
-# Redefines pytest's typing for 100% test coverage
-_ScopeName = Literal["session", "package", "module", "class", "function"]
-
-T = TypeVar("T")
-T_co = TypeVar("T_co", covariant=True)
-KT = TypeVar("KT")
-VT = TypeVar("VT")
-P = ParamSpec("P")
-
-# Using algebraic data typing
-SPECIAL_TYPES_SET: set[Any] = {Literal, Ellipsis, Any}
-SUM_TYPES_SET: set[Any] = {Union, Optional, Enum}
-PRODUCT_TYPES_SET: set[Any] = {
-    List,
-    list,
-    Set,
-    set,
-    FrozenSet,
-    frozenset,
-    Dict,
-    dict,
-    Tuple,
-    tuple,
-}
+from pytest_static.custom_typing import KT
+from pytest_static.custom_typing import VT
+from pytest_static.custom_typing import T
+from pytest_static.custom_typing import T_co
+from pytest_static.custom_typing import TypeHandler
+from pytest_static.custom_typing import _ScopeName
+from pytest_static.type_handler import TypeHandlerRegistry
+from pytest_static.type_sets import BOOL_PARAMS
+from pytest_static.type_sets import BYTES_PARAMS
+from pytest_static.type_sets import COMPLEX_PARAMS
+from pytest_static.type_sets import DEFAULT_INSTANCE_SETS
+from pytest_static.type_sets import FLOAT_PARAMS
+from pytest_static.type_sets import INT_PARAMS
+from pytest_static.type_sets import STR_PARAMS
+from pytest_static.util import get_base_type
 
 
-if sys.version_info >= (3, 10):
-    UNION_TYPES: set[Any] = {Union, _UnionGenericAlias, types.UnionType}
-else:
-    UNION_TYPES: set[Any] = {Union, _UnionGenericAlias}
+type_handlers: TypeHandlerRegistry = TypeHandlerRegistry()
 
 
 def parametrize_types(
@@ -104,43 +78,109 @@ def _ensure_sequence(value: str | Sequence[str]) -> Sequence[str]:
     return value
 
 
-def get_all_possible_type_instances(type_argument: type[T]) -> tuple[T, ...]:
+def get_all_possible_type_instances(type_argument: Any) -> tuple[Any, ...]:
     """Gets all possible instances for the given type."""
     return tuple(iter_instances(type_argument))
 
 
-def iter_instances(typ: Any) -> Generator[Any, None, None]:
-    """Iterates over all possible instances of the given type."""
-    origin: Any = get_origin(typ)
-    type_args: tuple[Any, ...] = get_args(typ)
-    base_type: Any = origin if origin is not None else typ
+def iter_instances(key: Any, handler_registry: TypeHandlerRegistry = type_handlers) -> Generator[Any, None, None]:
+    """Returns a Generator that yields from all handlers."""
+    base_type: Any = get_base_type(key)
+    type_args: tuple[Any, ...] = get_args(key)
 
-    handler: (
-        Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]] | partial[Generator[Any, None, None]] | None
-    ) = TYPE_HANDLERS.get(base_type, None)
+    fallback_handlers: Iterable[TypeHandler] = [_iter_instances_using_fallback]
+    handlers: Iterable[TypeHandler] = handler_registry.get(base_type, fallback_handlers)
 
-    if handler is None:
-        yield from _iter_custom_instances(base_type, type_args)
-    else:
+    for handler in handlers:
         yield from handler(base_type, type_args)
 
 
+def _iter_instances_using_fallback(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    """Returns a Generator that yields from default fallback methods for the given base_type and type_args."""
+    if isinstance(base_type, TypeVar):
+        yield from _iter_type_var_instances(base_type, type_args)
+    elif is_protocol(base_type):
+        yield from _iter_protocol_instances(base_type, type_args)
+    elif callable(base_type):
+        yield from _iter_callable_instances(base_type, type_args)
+    else:
+        raise TypeError(f"Failed to find a fallback method for instantiating {base_type=}.")
+
+
+def _iter_type_var_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    if base_type.__constraints__:
+        for constraint in base_type.__constraints__:
+            yield from get_all_possible_type_instances(constraint)
+    elif base_type.__bound__:
+        yield from get_all_possible_type_instances(base_type.__bound__)
+    else:
+        yield from get_all_possible_type_instances(Any)
+
+
+def _iter_callable_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    type_hints: dict[str, Any] = get_type_hints(base_type)
+    type_annotations: tuple[Any, ...] = tuple(v for k, v in type_hints.items() if k != "return")
+    yield from _iter_product_instances_with_constructor(base_type, type_annotations, type_constructor=base_type)
+
+
+def _iter_protocol_instances(typ: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    raise NotImplementedError
+
+
+@type_handlers.register(type(None))  # pragma: no cover
+def _iter_none_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    yield None
+
+
+@type_handlers.register(bool)  # pragma: no cover
+def _iter_bool_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    yield from BOOL_PARAMS
+
+
+@type_handlers.register(int)  # pragma: no cover
+def _iter_int_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    yield from INT_PARAMS
+
+
+@type_handlers.register(float)  # pragma: no cover
+def _iter_float_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    yield from FLOAT_PARAMS
+
+
+@type_handlers.register(complex)  # pragma: no cover
+def _iter_complex_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    yield from COMPLEX_PARAMS
+
+
+@type_handlers.register(str)  # pragma: no cover
+def _iter_str_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    yield from STR_PARAMS
+
+
+@type_handlers.register(bytes)  # pragma: no cover
+def _iter_bytes_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    yield from BYTES_PARAMS
+
+
+@type_handlers.register(Literal)  # pragma: no cover
 def _iter_literal_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
     yield from type_args
 
 
+@type_handlers.register(Any)  # pragma: no cover
 def _iter_any_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
-    for typ in PREDEFINED_INSTANCE_SETS.keys():
-        yield from iter_instances(typ)
+    for typ in DEFAULT_INSTANCE_SETS.keys():
+        yield from get_all_possible_type_instances(typ)
 
 
-def _iter_predefined_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
-    yield from PREDEFINED_INSTANCE_SETS[base_type]
-
-
+@type_handlers.register(Union, Optional, Enum)  # pragma: no cover
 def _iter_sum_instances(_: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
     for arg in type_args:
         yield from get_all_possible_type_instances(arg)
+
+
+def _iter_combinations(type_args: tuple[Any, ...]) -> Generator[tuple[Any, ...], None, None]:
+    yield from itertools.product(*map(get_all_possible_type_instances, type_args))
 
 
 def _iter_product_instances_with_constructor(
@@ -151,88 +191,61 @@ def _iter_product_instances_with_constructor(
 ) -> Generator[T_co, None, None]:
     if Ellipsis in type_args:
         type_args = type_args[:-1]
-
-    combinations: Iterable[Iterable[Any]] = itertools.product(*(iter_instances(arg) for arg in type_args))
-    yield from map(type_constructor, map(tuple, combinations))
+    yield from itertools.starmap(type_constructor, _iter_combinations(type_args))
 
 
 def _validate_combination_length(combination: tuple[Any, ...], expected_length: int, typ: type[Any]) -> None:
     if len(combination) != expected_length:
-        raise TypeError(f"Expected combination of length {expected_length} for " f"type {typ}. Got {len(combination)}")
+        raise TypeError(f"Expected combination of length {expected_length} for type {typ}. Got {len(combination)}")
 
 
-def _iter_custom_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
-    """Planned for future, but not yet implemented."""
-    raise NotImplementedError
+def _dict_constructor(k: KT, v: VT) -> dict[KT, VT]:
+    return {k: v}
 
 
-def _dict_constructor(combination: tuple[KT, VT]) -> dict[KT, VT]:
-    _validate_combination_length(combination=combination, expected_length=2, typ=dict)
-    return {combination[0]: combination[1]}
+def _list_constructor(value: T) -> list[T]:
+    return [value]
 
 
-def _list_constructor(combination: tuple[T]) -> list[T]:
-    _validate_combination_length(combination=combination, expected_length=1, typ=list)
-    return list(combination)
+def _set_constructor(value: T) -> set[T]:
+    _validate_combination_length(combination=(value,), expected_length=1, typ=set)
+    return {value}
 
 
-def _set_constructor(combination: tuple[T]) -> set[T]:
-    _validate_combination_length(combination=combination, expected_length=1, typ=set)
-    return set(combination)
+def _frozenset_constructor(*args: Any) -> frozenset[Any]:
+    _validate_combination_length(combination=args, expected_length=1, typ=frozenset)
+    return frozenset(args)
 
 
-def _frozenset_constructor(combination: tuple[T]) -> frozenset[T]:
-    _validate_combination_length(combination=combination, expected_length=1, typ=frozenset)
-    return frozenset(combination)
-
-
-def _tuple_constructor(combination: T) -> T:
-    return combination
+def _tuple_constructor(*args: Any) -> tuple[Any, ...]:
+    return tuple(args)
 
 
 _iter_dict_instances: partial[Generator[Any, None, None]] = partial(
     _iter_product_instances_with_constructor, type_constructor=_dict_constructor
 )
+type_handlers.register(dict)(_iter_dict_instances)  # pragma: no cover
 
 
 _iter_list_instances: partial[Generator[Any, None, None]] = partial(
     _iter_product_instances_with_constructor, type_constructor=_list_constructor
 )
+type_handlers.register(list)(_iter_list_instances)  # pragma: no cover
 
 
 _iter_set_instances: partial[Generator[Any, None, None]] = partial(
     _iter_product_instances_with_constructor, type_constructor=_set_constructor
 )
+type_handlers.register(set)(_iter_set_instances)  # pragma: no cover
 
 
 _iter_frozenset_instances: partial[Generator[Any, None, None]] = partial(
     _iter_product_instances_with_constructor, type_constructor=_frozenset_constructor
 )
+type_handlers.register(frozenset)(_iter_frozenset_instances)  # pragma: no cover
 
 
 _iter_tuple_instances: partial[Generator[Any, None, None]] = partial(
     _iter_product_instances_with_constructor, type_constructor=_tuple_constructor
 )
-
-
-PREDEFINED_TYPE_SET_HANDLERS: dict[type[Any], Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]]] = {
-    typ: _iter_predefined_instances for typ in PREDEFINED_INSTANCE_SETS.keys()
-}
-
-
-TYPE_HANDLERS: dict[
-    Any,
-    Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]] | partial[Generator[Any, None, None]],
-] = {
-    **PREDEFINED_TYPE_SET_HANDLERS,
-    Literal: _iter_literal_instances,
-    Any: _iter_any_instances,
-    Union: _iter_sum_instances,
-    Optional: _iter_sum_instances,
-    Enum: _iter_sum_instances,
-    dict: _iter_dict_instances,
-    list: _iter_list_instances,
-    set: _iter_set_instances,
-    frozenset: _iter_frozenset_instances,
-    tuple: _iter_tuple_instances,
-}
+type_handlers.register(tuple)(_iter_tuple_instances)  # pragma: no cover
