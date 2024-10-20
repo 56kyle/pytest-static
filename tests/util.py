@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 from typing import Dict
 from typing import FrozenSet
+from typing import Generator
 from typing import List
 from typing import Optional
 from typing import Set
@@ -13,19 +14,20 @@ from typing import Union
 from typing import _SpecialGenericAlias  # type: ignore[attr-defined]
 
 from typing_extensions import Literal
+from typing_extensions import Protocol
 from typing_extensions import get_args
 from typing_extensions import get_origin
 
-from pytest_static.type_sets import PREDEFINED_INSTANCE_SETS
+from pytest_static.type_sets import DEFAULT_INSTANCE_SETS
 
 
 # Predefined Instance Set Lengths
-BOOL_LEN: int = len(PREDEFINED_INSTANCE_SETS[bool])
-INT_LEN: int = len(PREDEFINED_INSTANCE_SETS[int])
-FLOAT_LEN: int = len(PREDEFINED_INSTANCE_SETS[float])
-COMPLEX_LEN: int = len(PREDEFINED_INSTANCE_SETS[complex])
-STR_LEN: int = len(PREDEFINED_INSTANCE_SETS[str])
-BYTES_LEN: int = len(PREDEFINED_INSTANCE_SETS[bytes])
+BOOL_LEN: int = len(DEFAULT_INSTANCE_SETS[bool])
+INT_LEN: int = len(DEFAULT_INSTANCE_SETS[int])
+FLOAT_LEN: int = len(DEFAULT_INSTANCE_SETS[float])
+COMPLEX_LEN: int = len(DEFAULT_INSTANCE_SETS[complex])
+STR_LEN: int = len(DEFAULT_INSTANCE_SETS[str])
+BYTES_LEN: int = len(DEFAULT_INSTANCE_SETS[bytes])
 NONE_LEN: int = 1
 ELLIPSIS_LEN: int = 0
 ANY_LEN: int = BOOL_LEN + INT_LEN + FLOAT_LEN + COMPLEX_LEN + STR_LEN + BYTES_LEN + NONE_LEN + ELLIPSIS_LEN
@@ -87,16 +89,10 @@ PRODUCT_TYPE_DOUBLE_GENERIC_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
 
 
 PRODUCT_TYPE_SEVERAL_GENERIC_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
-    (Tuple[bool, int, str], BOOL_LEN * INT_LEN * STR_LEN),
-    (
-        Tuple[Union[bool, int], int, Union[bool, str]],
-        (BOOL_LEN + INT_LEN) * INT_LEN * (BOOL_LEN + STR_LEN),
-    ),
-    (tuple[bool, int, str], BOOL_LEN * INT_LEN * STR_LEN),
-    (
-        tuple[Union[bool, int], int, Union[bool, str]],
-        (BOOL_LEN + INT_LEN) * INT_LEN * (BOOL_LEN + STR_LEN),
-    ),
+    (Tuple[bool, int, float], BOOL_LEN * INT_LEN * FLOAT_LEN),
+    (Tuple[Union[bool, int], int, Union[bool, int]], (BOOL_LEN + INT_LEN) * INT_LEN * (BOOL_LEN + INT_LEN)),
+    (tuple[bool, int, float], BOOL_LEN * INT_LEN * FLOAT_LEN),
+    (tuple[Union[bool, int], int, Union[bool, int]], (BOOL_LEN + INT_LEN) * INT_LEN * (BOOL_LEN + INT_LEN)),
 ]
 
 
@@ -114,6 +110,17 @@ PRODUCT_TYPE_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
     *PRODUCT_TYPE_SEVERAL_GENERIC_EXPECTED_EXAMPLES,
     *PRODUCT_TYPE_PARAM_SPEC_GENERIC_EXPECTED_EXAMPLES,
 ]
+
+
+DUMMY_TYPE_HANDLER_OUTPUT: tuple[int, ...] = (1, 2, 3)
+
+
+def dummy_type_handler(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    yield from DUMMY_TYPE_HANDLER_OUTPUT
+
+
+class DummyProtocol(Protocol):
+    def foo(self) -> int: ...  # pragma: no cover  # noqa: E704
 
 
 def type_annotation_to_string(annotation: Any) -> str:
