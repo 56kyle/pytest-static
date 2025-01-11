@@ -1,11 +1,11 @@
 [package]
-name = "pytest_static_stuff"
+name = "pytest_static_core"
 version = "1.0.4"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
-name = "pytest_static_stuff"
+name = "pytest_static_core"
 crate-type = ["cdylib"]
 
 [dependencies]
