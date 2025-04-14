@@ -37,7 +37,27 @@ indent-width = 4
 target-version = "py39"
 
 [lint]
-select = ["B", "B9", "C", "D", "E", "F", "N", "S", "W"]
+# https://docs.astral.sh/ruff/rules
+select = [
+    "A",
+    "ARG",
+    "B",
+    "B9",
+    "BLE",
+    "C",
+    "C4",
+    "D",
+    "DTZ",
+    "E",
+    "F",
+    "I",
+    "N",
+    "PT",
+    "PTH",
+    "Q",
+    "S",
+    "W"
+]
 ignore = ["E203", "E501"]
 
 
@@ -47,6 +67,9 @@ unfixable = []
 
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[lint.flake8-quotes]
+inline-quotes = "double"
 
 [lint.isort]
 force-single-line = true
