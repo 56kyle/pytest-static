@@ -58,6 +58,7 @@ max-complexity = 10
 [lint.per-file-ignores]
 "tests/*" = ["S101", "D100", "D101", "D102", "D103", "D104"]
 "exceptions.py" = ["D107"]
+"noxfile.py" = ["S101"]
 
 [lint.pydocstyle]
 convention = "google"
