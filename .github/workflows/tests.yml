@@ -99,7 +99,7 @@ jobs:
         if: always() && matrix.session == 'tests'
         uses: "actions/upload-artifact@v4"
         with:
-          name: coverage-data
+          name: coverage-data-${{ runner.os }}-${{ runner.arch }}
           path: ".coverage.*"
           include-hidden-files: true
 
@@ -141,7 +141,7 @@ jobs:
       - name: Download coverage data
         uses: actions/download-artifact@v3
         with:
-          name: coverage-data
+          name: coverage-data-${{ runner.os }}-${{ runner.arch }}
 
       - name: Combine coverage data and display human readable report
         run: |
