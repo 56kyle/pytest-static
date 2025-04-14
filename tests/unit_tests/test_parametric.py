@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Generator
+from collections.abc import Iterable
 from typing import Any
-from typing import Generator
-from typing import Iterable
 from typing import Literal
 from typing import TypeVar
 
@@ -79,7 +79,7 @@ def test_module_level_registrations() -> None:
 
 
 def test_get_all_possible_type_instances(monkeypatch: MonkeyPatch) -> None:
-    def example_ints(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    def example_ints(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any]:
         yield from [1, 2, 3]
 
     monkeypatch.setitem(type_handlers._mapping, int, [example_ints])
@@ -173,7 +173,7 @@ def test__iter_type_var_instances(base_type: Any, type_args: tuple[Any, ...], ex
 
 def test__iter_protocol_instances() -> None:
     class DummyProtocolB(Protocol):
-        def dummy_method(self, x: int) -> None: ...  # pragma: no cover  # noqa: E704
+        def dummy_method(self, x: int) -> None: ...  # pragma: no cover
 
     with pytest.raises(NotImplementedError):
         _iter_protocol_instances(DummyProtocolB, tuple())

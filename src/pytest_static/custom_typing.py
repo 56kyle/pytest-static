@@ -1,8 +1,8 @@
 """Module containing custom types used throughout pytest-static."""
 
+from collections.abc import Generator
 from typing import Any
 from typing import Callable
-from typing import Generator
 from typing import TypeVar
 from typing import Union
 
@@ -11,15 +11,15 @@ from typing_extensions import ParamSpec
 
 
 __all__: list[str] = [
-    "_UnionGenericAlias",
-    "_LiteralSpecialForm",
-    "_ScopeName",
-    "T",
     "KT",
     "VT",
-    "T_co",
     "P",
+    "T",
+    "T_co",
     "TypeHandler",
+    "_LiteralSpecialForm",
+    "_ScopeName",
+    "_UnionGenericAlias",
 ]
 
 

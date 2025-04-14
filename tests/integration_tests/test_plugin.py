@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Iterable
-from typing import Sequence
 
 import pytest
 from _pytest.fixtures import FixtureRequest

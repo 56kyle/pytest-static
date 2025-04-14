@@ -1,7 +1,7 @@
 """Fixtures used in unit tests."""
 
+from collections.abc import Generator
 from typing import Any
-from typing import Generator
 
 import pytest
 from _pytest.fixtures import FixtureRequest

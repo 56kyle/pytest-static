@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Generator
 from typing import Any
 from typing import Dict
 from typing import FrozenSet
-from typing import Generator
 from typing import List
 from typing import Optional
 from typing import Set
@@ -35,9 +35,9 @@ ANY_LEN: int = BOOL_LEN + INT_LEN + FLOAT_LEN + COMPLEX_LEN + STR_LEN + BYTES_LE
 
 SPECIAL_TYPE_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
     (Literal[1, 2, 3], 3),
-    (Literal[1, Literal[2, 3]], 3),
-    (Literal[1, Literal[Literal[2, 3], Literal[4, 5]]], 5),
-    (Literal[1, Literal[Literal[1, 2], Literal[2, 3], Literal[3, 4]]], 4),
+    (Literal[1, 2, 3], 3),
+    (Literal[1, 2, 3, 4, 5], 5),
+    (Literal[1, 1, 2, 2, 3, 3, 4], 4),
     (Any, ANY_LEN),
 ]
 
@@ -115,12 +115,12 @@ PRODUCT_TYPE_EXPECTED_EXAMPLES: list[tuple[Any, int]] = [
 DUMMY_TYPE_HANDLER_OUTPUT: tuple[int, ...] = (1, 2, 3)
 
 
-def dummy_type_handler(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+def dummy_type_handler(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any]:
     yield from DUMMY_TYPE_HANDLER_OUTPUT
 
 
 class DummyProtocol(Protocol):
-    def foo(self) -> int: ...  # pragma: no cover  # noqa: E704
+    def foo(self) -> int: ...  # pragma: no cover
 
 
 def type_annotation_to_string(annotation: Any) -> str:
@@ -141,9 +141,9 @@ def _get_origin_string(annotation: Any) -> str:
 
     if annotation in [None, type(None)]:
         return "None"
-    elif annotation in [..., Ellipsis]:
+    if annotation in [..., Ellipsis]:
         return "..."
-    elif isinstance(annotation, _SpecialGenericAlias):
+    if isinstance(annotation, _SpecialGenericAlias):
         annotation_name = getattr(annotation, "__name__", str(annotation))
     elif isinstance(annotation, type):
         annotation_name = annotation.__name__
