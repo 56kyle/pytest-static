@@ -102,6 +102,7 @@ jobs:
           name: coverage-data-${{ runner.os }}-${{ runner.arch }}
           path: ".coverage.*"
           include-hidden-files: true
+          overwrite: "true"
 
       - name: Upload documentation
         if: matrix.session == 'docs-build'
@@ -109,6 +110,7 @@ jobs:
         with:
           name: docs
           path: docs/_build
+          overwrite: "true"
 
   coverage:
     runs-on: ubuntu-latest
