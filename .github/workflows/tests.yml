@@ -99,7 +99,7 @@ jobs:
         if: always() && matrix.session == 'tests'
         uses: "actions/upload-artifact@v4"
         with:
-          name: coverage-data-${{ runner.os }}-${{ runner.arch }}
+          name: coverage-data-${{ runner.os }}-${{ runner.arch }}-py${{ matrix.python }}
           path: ".coverage.*"
           include-hidden-files: true
           overwrite: "true"
@@ -112,9 +112,20 @@ jobs:
           path: docs/_build
           overwrite: "true"
 
-  coverage:
+  merge-artifacts:
     runs-on: ubuntu-latest
     needs: tests
+    steps:
+      - name: Merge Artifacts
+        uses: actions/upload-artifact/merge@v4
+        with:
+          name: coverage-data
+          pattern: coverage-data-*
+          delete-merged: true
+
+  coverage:
+    runs-on: ubuntu-latest
+    needs: merge-artifacts
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
@@ -143,7 +154,7 @@ jobs:
       - name: Download coverage data
         uses: actions/download-artifact@v4
         with:
-          name: coverage-data-${{ runner.os }}-${{ runner.arch }}
+          name: coverage-data-${{ runner.os }}-${{ runner.arch }}-py${{ matrix.python }}
 
       - name: Combine coverage data and display human readable report
         run: |
