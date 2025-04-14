@@ -48,10 +48,19 @@ unfixable = []
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
+[lint.isort]
+force-single-line = true
+lines-after-imports = 2
+
+[lint.mccabe]
+max-complexity = 10
+
 [lint.per-file-ignores]
 "tests/*" = ["S101", "D100", "D101", "D102", "D103", "D104"]
 "exceptions.py" = ["D107"]
 
+[lint.pydocstyle]
+convention = "google"
 
 [format]
 # Like Black, use double quotes for strings.
@@ -79,14 +88,3 @@ docstring-code-format = false
 # This only has an effect when the `docstring-code-format` setting is
 # enabled.
 docstring-code-line-length = "dynamic"
-
-[mccabe]
-max-complexity = 10
-
-[isort]
-force-single-line = true
-lines-after-imports = 2
-
-
-[pydocstyle]
-convention = "google"
