@@ -39,7 +39,6 @@ target-version = "py39"
 [lint]
 select = ["B", "B9", "C", "D", "E", "F", "N", "S", "W"]
 ignore = ["E203", "E501"]
-pydocstyle.convention = "google"
 
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
@@ -80,3 +79,14 @@ docstring-code-format = false
 # This only has an effect when the `docstring-code-format` setting is
 # enabled.
 docstring-code-line-length = "dynamic"
+
+[mccabe]
+max-complexity = 10
+
+[isort]
+force-single-line = true
+lines-after-imports = 2
+
+
+[pydocstyle]
+convention = "google"
