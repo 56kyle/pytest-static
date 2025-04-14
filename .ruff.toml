@@ -55,7 +55,14 @@ select = [
     "PT",
     "PTH",
     "Q",
+    "RET",
+    "RUF",
     "S",
+    "SIM",
+    "SLF",
+    "T10",
+    "TC",
+    "UP",
     "W"
 ]
 ignore = ["E203", "E501"]
