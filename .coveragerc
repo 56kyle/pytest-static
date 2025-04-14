@@ -1,0 +1,11 @@
+[paths]
+source = ["src", "*/site-packages"]
+tests = ["tests", "*/tests"]
+
+[run]
+branch = true
+source = ["pytest_static", "tests"]
+
+[report]
+show_missing = true
+fail_under = 100
