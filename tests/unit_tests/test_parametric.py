@@ -64,8 +64,8 @@ class DummyClassNoArgs:
     pass
 
 
-def dummy_iter_instances(typ: Any) -> Generator[Any, None, None]:
-    yield from (1, 2, 3)
+def dummy_callable(typ: Any) -> str:
+    return str(typ)
 
 
 def assert_len(iterable: Iterable[Any], expected: int) -> None:
@@ -172,16 +172,15 @@ def test__iter_type_var_instances(base_type: Any, type_args: tuple[Any, ...], ex
 
 
 def test__iter_protocol_instances() -> None:
-    class DummyProtocol(Protocol):
-        def dummy_method(self, x: int) -> None:
-            ...
+    class DummyProtocolB(Protocol):
+        def dummy_method(self, x: int) -> None: ...  # pragma: no cover  # noqa: E704
 
     with pytest.raises(NotImplementedError):
-        _iter_protocol_instances(DummyProtocol, tuple())
+        _iter_protocol_instances(DummyProtocolB, tuple())
 
 
 def test__iter_callable_instances() -> None:
-    assert_len(_iter_callable_instances(dummy_iter_instances, tuple()), ANY_LEN)
+    assert_len(_iter_callable_instances(dummy_callable, tuple()), ANY_LEN)
 
 
 @pytest.mark.parametrize(

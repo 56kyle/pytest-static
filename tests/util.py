@@ -120,7 +120,7 @@ def dummy_type_handler(base_type: Any, type_args: tuple[Any, ...]) -> Generator[
 
 
 class DummyProtocol(Protocol):
-    def foo(self) -> int: ...  # noqa: E704
+    def foo(self) -> int: ...  # pragma: no cover  # noqa: E704
 
 
 def type_annotation_to_string(annotation: Any) -> str:

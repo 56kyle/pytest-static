@@ -40,8 +40,6 @@ from pytest_static.util import get_base_type
 
 type_handlers: TypeHandlerRegistry = TypeHandlerRegistry()
 
-JT = TypeVar("JT")
-
 
 def parametrize_types(
     metafunc: Metafunc,
