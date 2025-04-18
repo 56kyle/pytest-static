@@ -26,7 +26,7 @@ class TypeHandlerRegistry:
         self.__getitem__: Callable[[Any], Any] = self._proxy.__getitem__
         self.get: Union[Callable[[Any], Any], Callable[[Any, Any], Any]] = self._proxy.get
 
-    def __getitem__(self, key) -> Any:
+    def __getitem__(self, key: Any) -> Any:
         """Returns from proxy."""
         return self._proxy.__getitem__(key)
 
