@@ -113,7 +113,7 @@ def _iter_instances_using_fallback(base_type: Any, type_args: tuple[Any, ...]) -
         raise TypeError(f"Failed to find a fallback method for instantiating {base_type=}.")
 
 
-def _iter_type_var_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any]:
+def _iter_type_var_instances(base_type: Any, _: tuple[Any, ...], **__: Any) -> Generator[Any]:
     if base_type.__constraints__:
         for constraint in base_type.__constraints__:
             yield from get_all_possible_type_instances(constraint)
@@ -123,58 +123,58 @@ def _iter_type_var_instances(base_type: Any, type_args: tuple[Any, ...]) -> Gene
         yield from get_all_possible_type_instances(Any)
 
 
-def _iter_callable_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any]:
+def _iter_callable_instances(base_type: Any, _: tuple[Any, ...], **__: Any) -> Generator[Any]:
     type_hints: dict[str, Any] = get_type_hints(base_type)
     type_annotations: tuple[Any, ...] = tuple(v for k, v in type_hints.items() if k != "return")
     yield from _iter_product_instances_with_constructor(base_type, type_annotations, type_constructor=base_type)
 
 
-def _iter_protocol_instances(typ: Any, type_args: tuple[Any, ...]) -> Generator[Any]:
+def _iter_protocol_instances(*_: Any, **__: Any) -> Generator[Any]:
     raise NotImplementedError
 
 
 @type_handlers.register(type(None))  # pragma: no cover
-def _iter_none_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any]:
+def _iter_none_instances(*_: Any, **__: Any) -> Generator[Any]:
     yield None
 
 
 @type_handlers.register(bool)  # pragma: no cover
-def _iter_bool_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any]:
+def _iter_bool_instances(*_: Any, **__: Any) -> Generator[Any]:
     yield from BOOL_PARAMS
 
 
 @type_handlers.register(int)  # pragma: no cover
-def _iter_int_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any]:
+def _iter_int_instances(*_: Any, **__: Any) -> Generator[Any]:
     yield from INT_PARAMS
 
 
 @type_handlers.register(float)  # pragma: no cover
-def _iter_float_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any]:
+def _iter_float_instances(*_: Any, **__: Any) -> Generator[Any]:
     yield from FLOAT_PARAMS
 
 
 @type_handlers.register(complex)  # pragma: no cover
-def _iter_complex_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any]:
+def _iter_complex_instances(*_: Any, **__: Any) -> Generator[Any]:
     yield from COMPLEX_PARAMS
 
 
 @type_handlers.register(str)  # pragma: no cover
-def _iter_str_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any]:
+def _iter_str_instances(*_: Any, **__: Any) -> Generator[Any]:
     yield from STR_PARAMS
 
 
 @type_handlers.register(bytes)  # pragma: no cover
-def _iter_bytes_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any]:
+def _iter_bytes_instances(*_: Any, **__: Any) -> Generator[Any]:
     yield from BYTES_PARAMS
 
 
 @type_handlers.register(Literal)  # pragma: no cover
-def _iter_literal_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any]:
+def _iter_literal_instances(_: Any, type_args: tuple[Any, ...], **__: Any) -> Generator[Any]:
     yield from type_args
 
 
 @type_handlers.register(Any)  # pragma: no cover
-def _iter_any_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any]:
+def _iter_any_instances(*_: Any) -> Generator[Any]:
     for typ in DEFAULT_INSTANCE_SETS:
         yield from get_all_possible_type_instances(typ)
 
