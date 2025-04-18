@@ -4,11 +4,15 @@ from __future__ import annotations
 
 import types
 from dataclasses import MISSING
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
 
-from pytest_static.custom_typing import TypeHandler
 from pytest_static.util import get_base_type
+
+
+if TYPE_CHECKING:
+    from pytest_static.custom_typing import TypeHandler
 
 
 class TypeHandlerRegistry:

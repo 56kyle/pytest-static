@@ -3,11 +3,9 @@
 from __future__ import annotations
 
 import itertools
-from collections.abc import Generator
-from collections.abc import Iterable
-from collections.abc import Sequence
 from enum import Enum
 from functools import partial
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
 from typing import Optional
@@ -16,17 +14,9 @@ from typing import Union
 from typing import get_args
 from typing import get_type_hints
 
-from _pytest.mark import Mark
-from _pytest.python import Metafunc
 from typing_extensions import Literal
 from typing_extensions import is_protocol
 
-from pytest_static.custom_typing import KT
-from pytest_static.custom_typing import VT
-from pytest_static.custom_typing import T
-from pytest_static.custom_typing import T_co
-from pytest_static.custom_typing import TypeHandler
-from pytest_static.custom_typing import _ScopeName
 from pytest_static.type_handler import TypeHandlerRegistry
 from pytest_static.type_sets import BOOL_PARAMS
 from pytest_static.type_sets import BYTES_PARAMS
@@ -36,6 +26,22 @@ from pytest_static.type_sets import FLOAT_PARAMS
 from pytest_static.type_sets import INT_PARAMS
 from pytest_static.type_sets import STR_PARAMS
 from pytest_static.util import get_base_type
+
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
+    from collections.abc import Iterable
+    from collections.abc import Sequence
+
+    from _pytest.mark import Mark
+    from _pytest.python import Metafunc
+
+    from pytest_static.custom_typing import KT
+    from pytest_static.custom_typing import VT
+    from pytest_static.custom_typing import T
+    from pytest_static.custom_typing import T_co
+    from pytest_static.custom_typing import TypeHandler
+    from pytest_static.custom_typing import _ScopeName
 
 
 type_handlers: TypeHandlerRegistry = TypeHandlerRegistry()
@@ -169,7 +175,7 @@ def _iter_literal_instances(base_type: Any, type_args: tuple[Any, ...]) -> Gener
 
 @type_handlers.register(Any)  # pragma: no cover
 def _iter_any_instances(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any]:
-    for typ in DEFAULT_INSTANCE_SETS.keys():
+    for typ in DEFAULT_INSTANCE_SETS:
         yield from get_all_possible_type_instances(typ)
 
 

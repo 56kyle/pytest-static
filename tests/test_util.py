@@ -9,7 +9,7 @@ from tests.util import _get_origin_string
 
 
 @pytest.mark.parametrize(
-    argnames=["annotation", "expected"],
+    argnames=("annotation", "expected"),
     argvalues=[
         (List, "List"),
         (List[int], "List"),

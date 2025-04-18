@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Generator
+from typing import TYPE_CHECKING  # type: ignore[attr-defined]
 from typing import Any
 from typing import Dict
 from typing import FrozenSet
@@ -19,6 +19,10 @@ from typing_extensions import get_args
 from typing_extensions import get_origin
 
 from pytest_static.type_sets import DEFAULT_INSTANCE_SETS
+
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 
 # Predefined Instance Set Lengths
