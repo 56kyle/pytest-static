@@ -85,7 +85,17 @@ lines-after-imports = 2
 max-complexity = 10
 
 [lint.per-file-ignores]
-"tests/*" = ["S101", "D100", "D101", "D102", "D103", "D104", "ARG001", "C408"]
+"tests/*" = [
+    "S101",
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D104",
+    "ARG001",
+    "C408",
+    "SLF001"
+]
 "exceptions.py" = ["D107"]
 "noxfile.py" = ["S101"]
 
