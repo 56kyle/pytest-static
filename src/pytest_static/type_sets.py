@@ -41,7 +41,7 @@ UNICODE_CHARS: frozenset[str] = frozenset(
         "\U0001f600",
     }
 )
-FOREIGN_CHARS: frozenset[str] = frozenset({"Д", "д", "ב", "ע", "α", "Ω", "い", "ろ", "は", "我", "们"})
+FOREIGN_CHARS: frozenset[str] = frozenset({"Д", "д", "ב", "ע", "α", "Ω", "い", "ろ", "は", "我", "们"})  # noqa: RUF001
 ESCAPE_SEQUENCES: frozenset[str] = frozenset(
     {
         "\\\\",
