@@ -7,6 +7,7 @@ from dataclasses import MISSING
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
+from typing import Union
 
 from pytest_static.util import get_base_type
 
@@ -18,18 +19,12 @@ if TYPE_CHECKING:
 class TypeHandlerRegistry:
     """Registry for various TypeHandler callbacks."""
 
-    def __init__(self, *args: Any, **kwargs: Any):
+    def __init__(self):
         """Sets up the Registry."""
         self._mapping: dict[Any, list[TypeHandler]] = {}
         self._proxy: types.MappingProxyType[Any, list[TypeHandler]] = types.MappingProxyType(self._mapping)
-
-    def __getitem__(self, *args: Any, **kwargs: Any) -> Any:
-        """Returns proxies getitem."""
-        return self._proxy.__getitem__(*args, **kwargs)
-
-    def get(self, *args: Any, **kwargs: Any) -> Any:
-        """Returns proxies get."""
-        return self._proxy.get(*args, **kwargs)
+        self.__getitem__: Callable[[Any], Any] = self._proxy.__getitem__
+        self.get: Union[Callable[[Any], Any], Callable[[Any, Any], Any]] = self._proxy.get
 
     def register(self, *args: Any) -> Callable[[TypeHandler], TypeHandler]:
         """Returns a decorator that registers a Callback to each of the provided keys.
