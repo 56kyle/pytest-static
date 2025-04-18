@@ -26,6 +26,9 @@ class TypeHandlerRegistry:
         self.__getitem__: Callable[[Any], Any] = self._proxy.__getitem__
         self.get: Union[Callable[[Any], Any], Callable[[Any, Any], Any]] = self._proxy.get
 
+    __getitem__: callable = types.MappingProxyType.__getitem__
+    get: callable = types.MappingProxyType.get
+
     def register(self, *args: Any) -> Callable[[TypeHandler], TypeHandler]:
         """Returns a decorator that registers a Callback to each of the provided keys.
 
