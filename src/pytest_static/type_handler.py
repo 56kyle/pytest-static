@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 class TypeHandlerRegistry:
     """Registry for various TypeHandler callbacks."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Sets up the Registry."""
         self._mapping: dict[Any, list[TypeHandler]] = {}
         self._proxy: types.MappingProxyType[Any, list[TypeHandler]] = types.MappingProxyType(self._mapping)
