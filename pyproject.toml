@@ -45,7 +45,6 @@ pep8-naming = ">=0.12.1"
 pre-commit = ">=2.16.0"
 pre-commit-hooks = ">=4.1.0"
 pyupgrade = ">=2.29.1"
-safety = ">=1.10.3"
 sphinx = ">=4.3.2"
 sphinx-autobuild = ">=2021.3.14"
 sphinx-click = ">=3.0.2"
@@ -61,6 +60,7 @@ pytest-static= "pytest_static.plugin"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.11.5"
+pip-audit = "^2.9.0"
 
 [tool.black]
 line-length = 120
