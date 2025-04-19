@@ -7,7 +7,6 @@ from dataclasses import MISSING
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
-from typing import Union
 
 from pytest_static.util import get_base_type
 
@@ -23,8 +22,6 @@ class TypeHandlerRegistry:
         """Sets up the Registry."""
         self._mapping: dict[Any, list[TypeHandler]] = {}
         self._proxy: types.MappingProxyType[Any, list[TypeHandler]] = types.MappingProxyType(self._mapping)
-        self.__getitem__: Callable[[Any], Any] = self._proxy.__getitem__
-        self.get: Union[Callable[[Any], Any], Callable[[Any, Any], Any]] = self._proxy.get
 
     def __getitem__(self, key: Any) -> Any:
         """Returns from proxy."""
