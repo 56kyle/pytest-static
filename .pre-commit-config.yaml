@@ -1,12 +1,6 @@
 repos:
   - repo: local
     hooks:
-      - id: black
-        name: black
-        entry: black
-        language: system
-        types: [python]
-        require_serial: true
       - id: check-added-large-files
         name: Check for added large files
         entry: check-added-large-files
