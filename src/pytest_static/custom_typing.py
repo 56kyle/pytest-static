@@ -8,6 +8,7 @@ from typing import Union
 
 from typing_extensions import Literal
 from typing_extensions import ParamSpec
+from typing_extensions import TypeAlias
 
 
 __all__: list[str] = [
@@ -47,4 +48,5 @@ class Missing:
 MISSING: Missing = Missing()
 
 
-TypeHandler = Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]]
+TypeHandler: TypeAlias = Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]]
+TypeConstructor: TypeAlias = Callable[..., T]

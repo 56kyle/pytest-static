@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     from pytest_static.custom_typing import VT
     from pytest_static.custom_typing import T
     from pytest_static.custom_typing import T_co
+    from pytest_static.custom_typing import TypeConstructor
     from pytest_static.custom_typing import TypeHandler
     from pytest_static.custom_typing import _ScopeName
 
@@ -193,7 +194,7 @@ def _iter_product_instances_with_constructor(
     _: Any,
     type_args: tuple[Any, ...],
     /,
-    type_constructor: Callable[[tuple[Any, ...]], T_co],
+    type_constructor: TypeConstructor[T_co],
 ) -> Generator[T_co]:
     if Ellipsis in type_args:
         type_args = type_args[:-1]
