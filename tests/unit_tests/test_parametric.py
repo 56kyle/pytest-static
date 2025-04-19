@@ -1,17 +1,14 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 from typing import Any
-from typing import Generator
-from typing import Iterable
 from typing import Literal
 from typing import TypeVar
 
 import pytest
-from _pytest.monkeypatch import MonkeyPatch
 from typing_extensions import ParamSpec
 from typing_extensions import Protocol
 
-from pytest_static.custom_typing import TypeHandler
 from pytest_static.parametric import _iter_bool_instances
 from pytest_static.parametric import _iter_bytes_instances
 from pytest_static.parametric import _iter_callable_instances
@@ -48,6 +45,15 @@ from tests.util import DummyProtocol
 from tests.util import dummy_type_handler
 
 
+if TYPE_CHECKING:
+    from collections.abc import Generator
+    from collections.abc import Iterable
+
+    from _pytest.monkeypatch import MonkeyPatch
+
+    from pytest_static.custom_typing import TypeHandler
+
+
 NoneType: type[None] = type(None)
 
 
@@ -79,7 +85,7 @@ def test_module_level_registrations() -> None:
 
 
 def test_get_all_possible_type_instances(monkeypatch: MonkeyPatch) -> None:
-    def example_ints(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any, None, None]:
+    def example_ints(base_type: Any, type_args: tuple[Any, ...]) -> Generator[Any]:
         yield from [1, 2, 3]
 
     monkeypatch.setitem(type_handlers._mapping, int, [example_ints])
@@ -88,7 +94,7 @@ def test_get_all_possible_type_instances(monkeypatch: MonkeyPatch) -> None:
 
 
 @pytest.mark.parametrize(
-    argnames=["typ", "expected_len"],
+    argnames=("typ", "expected_len"),
     argvalues=SPECIAL_TYPE_EXPECTED_EXAMPLES,
     ids=lambda typ: f"{typ}",
 )
@@ -97,7 +103,7 @@ def test_iter_instances_with_special_type(typ: Any, expected_len: int) -> None:
 
 
 @pytest.mark.parametrize(
-    argnames=["typ", "expected_len"],
+    argnames=("typ", "expected_len"),
     argvalues=BASIC_TYPE_EXPECTED_EXAMPLES,
     ids=lambda typ: f"{typ}",
 )
@@ -106,7 +112,7 @@ def test_iter_instances_with_basic_type(typ: Any, expected_len: int) -> None:
 
 
 @pytest.mark.parametrize(
-    argnames=["typ", "expected_len"],
+    argnames=("typ", "expected_len"),
     argvalues=SUM_TYPE_EXPECTED_EXAMPLES,
     ids=lambda typ: f"{typ}",
 )
@@ -115,7 +121,7 @@ def test_iter_instances_with_basic_sum_type(typ: Any, expected_len: int) -> None
 
 
 @pytest.mark.parametrize(
-    argnames=["typ", "expected_len"],
+    argnames=("typ", "expected_len"),
     argvalues=PRODUCT_TYPE_EXPECTED_EXAMPLES,
     ids=lambda typ: f"{typ}",
 )
@@ -124,7 +130,7 @@ def test_iter_instances_with_product_type(typ: Any, expected_len: int) -> None:
 
 
 @pytest.mark.parametrize(
-    argnames=["typ", "expected_len"],
+    argnames=("typ", "expected_len"),
     argvalues=PRODUCT_TYPE_MISSING_GENERIC_EXPECTED_EXAMPLES,
     ids=lambda typ: f"{typ}",
 )
@@ -142,7 +148,7 @@ def test_type_handlers(key: Any) -> None:
 
 
 @pytest.mark.parametrize(
-    argnames=["typ", "patched_function"],
+    argnames=("typ", "patched_function"),
     argvalues=[
         (T, _iter_type_var_instances),
         (dummy_type_handler, _iter_callable_instances),
@@ -160,7 +166,7 @@ def test__iter_instances_using_fallback_with_invalid() -> None:
 
 
 @pytest.mark.parametrize(
-    argnames=["base_type", "type_args", "expected_len"],
+    argnames=("base_type", "type_args", "expected_len"),
     argvalues=[
         (T_temp_constrained, tuple(), INT_LEN + STR_LEN),
         (T_temp_bound, tuple(), INT_LEN),
@@ -173,7 +179,7 @@ def test__iter_type_var_instances(base_type: Any, type_args: tuple[Any, ...], ex
 
 def test__iter_protocol_instances() -> None:
     class DummyProtocolB(Protocol):
-        def dummy_method(self, x: int) -> None: ...  # pragma: no cover  # noqa: E704
+        def dummy_method(self, x: int) -> None: ...  # pragma: no cover
 
     with pytest.raises(NotImplementedError):
         _iter_protocol_instances(DummyProtocolB, tuple())
@@ -184,7 +190,7 @@ def test__iter_callable_instances() -> None:
 
 
 @pytest.mark.parametrize(
-    argnames=["type_args", "expected_len"],
+    argnames=("type_args", "expected_len"),
     argvalues=[
         ((int,), INT_LEN),
         ((int, str), INT_LEN * STR_LEN),
