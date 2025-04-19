@@ -140,17 +140,10 @@ jobs:
           pipx inject --pip-args=--constraint=${{ github.workspace }}/.github/workflows/constraints.txt nox nox-poetry
           nox --version
 
-      - name: Merge Artifacts
-        uses: actions/upload-artifact/merge@v4
-        with:
-          name: coverage-data
-          pattern: coverage-data-*
-          delete-merged: true
-
       - name: Download coverage data
         uses: actions/download-artifact@v4
         with:
-          name: coverage-data
+          pattern: coverage-data-*
 
       - name: Combine coverage data and display human readable report
         run: |
