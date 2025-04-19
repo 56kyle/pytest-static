@@ -154,7 +154,7 @@ def mypy(session: Session) -> None:
 def tests(session: Session) -> None:
     """Run the test suite."""
     session.install(".")
-    session.install("coverage[toml]", "pytest", "pygments")
+    session.install("coverage", "pytest", "pygments")
     try:
         session.run("coverage", "run", "--parallel", "-m", "pytest", *session.posargs)
     finally:
@@ -167,7 +167,7 @@ def coverage(session: Session) -> None:
     """Produce the coverage report."""
     args = session.posargs or ["report"]
 
-    session.install("coverage[toml]")
+    session.install("coverage")
 
     if not session.posargs and any(Path().glob(".coverage.*")):
         session.run("coverage", "combine")
