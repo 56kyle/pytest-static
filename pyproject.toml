@@ -41,7 +41,6 @@ pytest-static = "pytest_static.plugin"
 [dependency-groups]
 dev = [
     "Pygments>=2.10.0",
-    "black>=21.10b0",
     "certifi>=2024.7.4",
     "coverage>=6.2",
     "darglint>=1.8.1",
