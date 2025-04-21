@@ -105,8 +105,6 @@ def precommit(session: nox.Session) -> None:
         "--show-diff-on-failure",
     ]
     session.install(
-        "bandit",
-        "black",
         "darglint",
         "ruff",
         "pep8-naming",
