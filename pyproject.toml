@@ -32,7 +32,13 @@ pytest = "^7.4.3"
 platformdirs = "^4.2.2"
 typing-extensions = "^4.9.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.scripts]
+pytest-static = "pytest_static.__main__:main"
+
+[tool.poetry.plugins."pytest"]
+pytest-static= "pytest_static.plugin"
+
+[tool.poetry.group.dev.dependencies]
 Pygments = ">=2.10.0"
 certifi = ">=2024.7.4"
 coverage = ">=6.2"
@@ -50,14 +56,6 @@ sphinx-click = ">=3.0.2"
 typeguard = ">=2.13.3"
 xdoctest = {extras = ["colors"], version = ">=0.15.10"}
 myst-parser = {version = ">=0.16.1"}
-
-[tool.poetry.scripts]
-pytest-static = "pytest_static.__main__:main"
-
-[tool.poetry.plugins."pytest"]
-pytest-static= "pytest_static.plugin"
-
-[tool.poetry.group.dev.dependencies]
 ruff = "^0.11.5"
 pip-audit = "^2.9.0"
 
