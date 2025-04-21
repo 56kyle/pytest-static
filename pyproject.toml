@@ -1,13 +1,11 @@
-[tool.poetry]
+[project]
 name = "pytest-static"
 version = "1.1.0"
 description = "pytest-static"
-authors = ["Kyle Oliver <56kyleoliver@gmail.com>"]
-license = "MIT"
+authors = [{ name = "Kyle Oliver", email = "56kyleoliver@gmail.com" }]
+requires-python = ">=3.9,<4.0"
 readme = "README.md"
-homepage = "https://github.com/56kyle/pytest-static"
-repository = "https://github.com/56kyle/pytest-static"
-documentation = "https://pytest-static.readthedocs.io"
+license = "MIT"
 classifiers = [
     "Development Status :: 1 - Planning",
     "Programming Language :: Python :: 3",
@@ -20,48 +18,50 @@ classifiers = [
     "Topic :: Software Development :: Testing",
     "Framework :: Pytest",
 ]
+dependencies = [
+    "click>=8.0.1",
+    "loguru>=0.7.2,<0.8",
+    "pytest>=7.4.3,<8",
+    "platformdirs>=4.2.2,<5",
+    "typing-extensions>=4.9.0,<5",
+]
 
-[tool.poetry.urls]
+[project.urls]
+Homepage = "https://github.com/56kyle/pytest-static"
+Repository = "https://github.com/56kyle/pytest-static"
+Documentation = "https://pytest-static.readthedocs.io"
 Changelog = "https://github.com/56kyle/pytest-static/releases"
 
-[tool.poetry.dependencies]
-python = "^3.9,<4.0"
-click = ">=8.0.1"
-loguru = "^0.7.2"
-pytest = "^7.4.3"
-platformdirs = "^4.2.2"
-typing-extensions = "^4.9.0"
-
-[tool.poetry.scripts]
+[project.scripts]
 pytest-static = "pytest_static.__main__:main"
 
-[tool.poetry.plugins."pytest"]
-pytest-static= "pytest_static.plugin"
+[project.entry-points.pytest]
+pytest-static = "pytest_static.plugin"
 
-[tool.poetry.group.dev.dependencies]
-Pygments = ">=2.10.0"
-certifi = ">=2024.7.4"
-coverage = ">=6.2"
-darglint = ">=1.8.1"
-furo = ">=2021.11.12"
-isort = ">=5.10.1"
-mypy = ">=0.930"
-pep8-naming = ">=0.12.1"
-pre-commit = ">=2.16.0"
-pre-commit-hooks = ">=4.1.0"
-pyupgrade = ">=2.29.1"
-sphinx = ">=4.3.2"
-sphinx-autobuild = ">=2021.3.14"
-sphinx-click = ">=3.0.2"
-typeguard = ">=2.13.3"
-xdoctest = {extras = ["colors"], version = ">=0.15.10"}
-myst-parser = {version = ">=0.16.1"}
-ruff = "^0.11.5"
-pip-audit = "^2.9.0"
-
-[tool.black]
-line-length = 120
+[dependency-groups]
+dev = [
+    "Pygments>=2.10.0",
+    "black>=21.10b0",
+    "certifi>=2024.7.4",
+    "coverage>=6.2",
+    "darglint>=1.8.1",
+    "furo>=2021.11.12",
+    "isort>=5.10.1",
+    "mypy>=0.930",
+    "pep8-naming>=0.12.1",
+    "pre-commit>=2.16.0",
+    "pre-commit-hooks>=4.1.0",
+    "pyupgrade>=2.29.1",
+    "sphinx>=4.3.2",
+    "sphinx-autobuild>=2021.3.14",
+    "sphinx-click>=3.0.2",
+    "typeguard>=2.13.3",
+    "xdoctest[colors]>=0.15.10",
+    "myst-parser>=0.16.1",
+    "ruff>=0.11.5,<0.12",
+    "pip-audit>=2.9.0,<3",
+]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
