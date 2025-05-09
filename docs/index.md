@@ -14,6 +14,7 @@ hidden:
 maxdepth: 1
 ---
 
+getting-started
 usage
 reference
 contributing
