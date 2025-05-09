@@ -1,9 +1,9 @@
 """Default type sets for pytest_static to use in parametrization."""
 
 import string
+from collections.abc import Mapping
 from types import MappingProxyType
 from typing import Any
-from typing import Mapping
 from typing import TypeVar
 
 
@@ -33,15 +33,15 @@ LOWERCASE_LETTERS: frozenset[str] = frozenset(string.ascii_lowercase)
 UPPERCASE_LETTERS: frozenset[str] = frozenset(string.ascii_uppercase)
 UNICODE_CHARS: frozenset[str] = frozenset(
     {
-        "\u00E9",
-        "\u00F1",
+        "\u00e9",
+        "\u00f1",
         "\u2603",
-        "\u00A9",
-        "\u00AE",
-        "\U0001F600",
+        "\u00a9",
+        "\u00ae",
+        "\U0001f600",
     }
 )
-FOREIGN_CHARS: frozenset[str] = frozenset({"Д", "д", "ב", "ע", "α", "Ω", "い", "ろ", "は", "我", "们"})
+FOREIGN_CHARS: frozenset[str] = frozenset({"Д", "д", "ב", "ע", "α", "Ω", "い", "ろ", "は", "我", "们"})  # noqa: RUF001
 ESCAPE_SEQUENCES: frozenset[str] = frozenset(
     {
         "\\\\",
@@ -109,9 +109,9 @@ BYTES_PARAMS: frozenset[bytes] = frozenset(
     {
         b"",
         b"\x00",
-        b"\xFF",
-        b"\x00\xFF",
-        b"\xFF\x00",
+        b"\xff",
+        b"\x00\xff",
+        b"\xff\x00",
         b" ",
         b"\t",
         b"\n",
@@ -133,7 +133,7 @@ BYTES_PARAMS: frozenset[bytes] = frozenset(
         b"z",
         b"Z",
         b"\x80",
-        b"\xFE",
+        b"\xfe",
     }
 )
 

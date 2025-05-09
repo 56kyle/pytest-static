@@ -24,7 +24,7 @@ except ImportError:
 
 
 package = "pytest_static"
-python_versions = ["3.12", "3.11", "3.10", "3.9"]
+python_versions = ["3.13", "3.12", "3.11", "3.10", "3.9"]
 nox.needs_version = ">= 2021.6.6"
 nox.options.sessions = (
     "pre-commit",
@@ -95,7 +95,7 @@ def activate_virtualenv_in_precommit_hooks(session: Session) -> None:
 
         text = hook.read_text()
 
-        if not any(Path("A") == Path("a") and bindir.lower() in text.lower() or bindir in text for bindir in bindirs):
+        if not any((Path("A") == Path("a") and bindir.lower() in text.lower()) or bindir in text for bindir in bindirs):
             continue
 
         lines = text.splitlines()
@@ -120,11 +120,7 @@ def precommit(session: Session) -> None:
         "bandit",
         "black",
         "darglint",
-        "flake8",
-        "flake8-bugbear",
-        "flake8-docstrings",
-        "flake8-rst-docstrings",
-        "isort",
+        "ruff",
         "pep8-naming",
         "pre-commit",
         "pre-commit-hooks",
@@ -139,8 +135,8 @@ def precommit(session: Session) -> None:
 def safety(session: Session) -> None:
     """Scan dependencies for insecure packages."""
     requirements = session.poetry.export_requirements()
-    session.install("safety")
-    session.run("safety", "check", "--full-report", f"--file={requirements}")
+    session.install("pip-audit")
+    session.run("pip-audit", "-r", requirements)
 
 
 @session(python=python_versions)
@@ -158,7 +154,7 @@ def mypy(session: Session) -> None:
 def tests(session: Session) -> None:
     """Run the test suite."""
     session.install(".")
-    session.install("coverage[toml]", "pytest", "pygments")
+    session.install("coverage", "pytest", "pygments")
     try:
         session.run("coverage", "run", "--parallel", "-m", "pytest", *session.posargs)
     finally:
@@ -171,7 +167,7 @@ def coverage(session: Session) -> None:
     """Produce the coverage report."""
     args = session.posargs or ["report"]
 
-    session.install("coverage[toml]")
+    session.install("coverage")
 
     if not session.posargs and any(Path().glob(".coverage.*")):
         session.run("coverage", "combine")

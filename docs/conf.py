@@ -2,7 +2,7 @@
 
 project = "pytest-static"
 author = "Kyle Oliver"
-copyright = "2023, Kyle Oliver"
+copyright = "2023, Kyle Oliver"  # noqa: A001
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",

@@ -1,25 +1,26 @@
 """Module containing custom types used throughout pytest-static."""
 
+from collections.abc import Generator
 from typing import Any
 from typing import Callable
-from typing import Generator
 from typing import TypeVar
 from typing import Union
 
 from typing_extensions import Literal
 from typing_extensions import ParamSpec
+from typing_extensions import TypeAlias
 
 
 __all__: list[str] = [
-    "_UnionGenericAlias",
-    "_LiteralSpecialForm",
-    "_ScopeName",
-    "T",
     "KT",
     "VT",
-    "T_co",
     "P",
+    "T",
+    "T_co",
     "TypeHandler",
+    "_LiteralSpecialForm",
+    "_ScopeName",
+    "_UnionGenericAlias",
 ]
 
 
@@ -47,4 +48,5 @@ class Missing:
 MISSING: Missing = Missing()
 
 
-TypeHandler = Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]]
+TypeHandler: TypeAlias = Callable[[Any, tuple[Any, ...]], Generator[Any, None, None]]
+TypeConstructor: TypeAlias = Callable[..., T]

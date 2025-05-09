@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Iterable
-from typing import Sequence
+from collections.abc import Iterable
+from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
 import pytest
-from _pytest.fixtures import FixtureRequest
-from _pytest.pytester import Pytester
 
 from pytest_static.plugin import pytest_configure
 from pytest_static.type_sets import BOOL_PARAMS
@@ -20,6 +18,13 @@ from tests.util import PRODUCT_TYPE_EXPECTED_EXAMPLES
 from tests.util import SPECIAL_TYPE_EXPECTED_EXAMPLES
 from tests.util import SUM_TYPE_EXPECTED_EXAMPLES
 from tests.util import type_annotation_to_string
+
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from _pytest.fixtures import FixtureRequest
+    from _pytest.pytester import Pytester
 
 
 @pytest.fixture
@@ -123,7 +128,7 @@ def test_parametrize_types_with_argnames_as_string(pytester: Pytester, conftest:
 
 
 @pytest.mark.parametrize(
-    argnames=["argtypes", "expected"],
+    argnames=("argtypes", "expected"),
     argvalues=[
         (("bool",), len(BOOL_PARAMS)),
         (("int",), len(INT_PARAMS)),
@@ -141,7 +146,7 @@ def test_parametrize_types_with_single_basic(pytester: Pytester, parametrize_typ
 
 
 @pytest.mark.parametrize(
-    argnames=["argtypes", "expected"],
+    argnames=("argtypes", "expected"),
     argvalues=[
         (("bool", "int"), len(BOOL_PARAMS) * len(INT_PARAMS)),
     ],
@@ -154,7 +159,7 @@ def test_parametrize_types_with_multiple_basic(pytester: Pytester, parametrize_t
 
 
 @pytest.mark.parametrize(
-    argnames=["argtypes", "expected"],
+    argnames=("argtypes", "expected"),
     argvalues=[
         (("List[int]",), len(INT_PARAMS)),
         (("List[str]",), len(STR_PARAMS)),
@@ -173,7 +178,7 @@ def test_parametrize_types_with_single_expanded(
 
 
 @pytest.mark.parametrize(
-    argnames=["argtypes", "expected"],
+    argnames=("argtypes", "expected"),
     argvalues=[
         (("List[int]", "List[str]"), len(INT_PARAMS) * len(STR_PARAMS)),
         (
@@ -196,7 +201,7 @@ def test_parametrize_types_with_multiple_expanded(
 
 
 @pytest.mark.parametrize(
-    argnames=["argtypes", "expected"],
+    argnames=("argtypes", "expected"),
     argvalues=[((type_annotation_to_string(typ),), expected) for typ, expected in SPECIAL_TYPE_EXPECTED_EXAMPLES],
     ids=lambda x: str(x) if isinstance(x, Iterable) else x,
     indirect=["argtypes"],
@@ -209,7 +214,7 @@ def test_parametrize_types_with_special_type_expected_examples(
 
 
 @pytest.mark.parametrize(
-    argnames=["argtypes", "expected"],
+    argnames=("argtypes", "expected"),
     argvalues=[((type_annotation_to_string(typ),), expected) for typ, expected in BASIC_TYPE_EXPECTED_EXAMPLES],
     ids=lambda x: str(x) if isinstance(x, Iterable) else x,
     indirect=["argtypes"],
@@ -222,7 +227,7 @@ def test_parametrize_types_with_basic_type_expected_examples(
 
 
 @pytest.mark.parametrize(
-    argnames=["argtypes", "expected"],
+    argnames=("argtypes", "expected"),
     argvalues=[((type_annotation_to_string(typ),), expected) for typ, expected in SUM_TYPE_EXPECTED_EXAMPLES],
     ids=lambda x: str(x) if isinstance(x, Iterable) else x,
     indirect=["argtypes"],
@@ -235,7 +240,7 @@ def test_parametrize_types_with_sum_type_expected_examples(
 
 
 @pytest.mark.parametrize(
-    argnames=["argtypes", "expected"],
+    argnames=("argtypes", "expected"),
     argvalues=[((type_annotation_to_string(typ),), expected) for typ, expected in PRODUCT_TYPE_EXPECTED_EXAMPLES],
     ids=lambda x: str(x) if isinstance(x, Iterable) else x,
     indirect=["argtypes"],
