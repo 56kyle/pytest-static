@@ -7,6 +7,7 @@ from dataclasses import MISSING
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
+from typing import get_args
 
 from pytest_static.util import get_base_type
 
@@ -22,6 +23,12 @@ class TypeHandlerRegistry:
         """Sets up the Registry."""
         self._mapping: dict[Any, list[TypeHandler]] = {}
         self._proxy: types.MappingProxyType[Any, list[TypeHandler]] = types.MappingProxyType(self._mapping)
+
+    @classmethod
+    def _validate_has_no_generic(cls, typ: Any) -> None:
+        """Validates that the provided typ has no generic type."""
+        if get_args(typ):
+            raise TypeError(f"Cannot register a type handler type containing generics: {typ}")
 
     def __getitem__(self, key: Any) -> Any:
         """Returns from proxy."""
@@ -47,6 +54,8 @@ class TypeHandlerRegistry:
             type_handlers.get_instances(int) => (100, 1000, 1, 2, 3, 4, 5)
             type_handlers.get_instances(float) => (1.0, 2.0, 3.0, 4.0, 5.0)
         """
+        for arg in args:
+            self._validate_has_no_generic(arg)
 
         def decorator(fn: TypeHandler) -> TypeHandler:
             for key in args:
