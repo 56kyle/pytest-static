@@ -9,7 +9,7 @@ homepage = "https://github.com/56kyle/pytest-static"
 repository = "https://github.com/56kyle/pytest-static"
 documentation = "https://pytest-static.readthedocs.io"
 classifiers = [
-    "Development Status :: 3 - Planning",
+    "Development Status :: 3 - Alpha",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
