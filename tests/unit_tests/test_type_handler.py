@@ -1,5 +1,9 @@
+from typing import Any
+from typing import List
+
 import pytest
 
+from pytest_static.custom_typing import T
 from pytest_static.custom_typing import TypeHandler
 from pytest_static.type_handler import TypeHandlerRegistry
 
@@ -36,6 +40,13 @@ class TestTypeHandlerRegistry:
         type_handler_registry__basic.register(int)(basic_handler)
         assert type_handler_registry__basic.get(int, None) is not None
         assert tuple(type_handler_registry__basic.get(int, None)[0](int, ())) == (1, 2, 3)
+
+    @pytest.mark.parametrize("generic", [str, list[str], T])
+    def test_register_with_generic(
+        self, type_handler_registry__basic: TypeHandlerRegistry, basic_handler: TypeHandler, generic: Any
+    ) -> None:
+        with pytest.raises(TypeError):
+            type_handler_registry__basic.register(List[generic])(basic_handler)
 
     def test_clear_with_unregistered(self, type_handler_registry: TypeHandlerRegistry) -> None:
         assert type_handler_registry.get(int, None) is None
